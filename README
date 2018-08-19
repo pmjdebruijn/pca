@@ -1,0 +1,52 @@
+Private Certification Authority
+===============================
+
+Important characteristics
+
+ * Written as a pure Bourne shell script (trivially adaptable)
+ * Only has limited error handling
+ * Has not been exhaustively tested
+ * Has not been audited by a third party
+ * Depends on GNU TLS' certtool
+ * Does not directly handle revocation (CRL/OCSP)
+
+Critical considerations for use
+
+ * You need to verify the correct operation of the script on your particular system
+ * You need to trust GNU TLS' key generation
+ * You need to trust your systems entropy (consider using a hardware entropy source like a ChaosKey)
+
+
+Basic Usage
+-----------
+
+Create a new root certification authority:
+
+$ pca -c US -o 'ACME Corporation' Anvil
+
+Create a new (optional) intermediate certification authority (under our previously created root):
+
+$ pca -c US -o 'ACME Corporation' -i Anvil inter
+
+Create a simple server certificate:
+
+$ pca -c US -o 'Example, Inc.' anvil/inter example.org
+
+Create a server certificate including an additional subdomain:
+
+$ pca -c US -o 'Example, Inc.' -d www.example.org anvil/inter example.org
+
+Create a server certificate including multiple additional subdomains:
+
+$ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' anvil/inter example.org
+
+Show certification authority hierarchical structure:
+
+$ find -type d anvil
+./anvil
+./anvil/inter
+./anvil/inter/example-org
+
+Note that the last parameter is used for a certificates' CN as-is, including capitilisation and spaces if quotes are used.
+The script also uses the last parameter for its directory structure (but applies some normalisation like caps removal).
+Therefore the authorities can be referred to using their normalised names after they have been created.
