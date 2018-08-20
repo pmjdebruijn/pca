@@ -170,8 +170,8 @@ if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ ! -d $CERT_
            --template			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg	\
            --load-privkey		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.key	\
            --outfile			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt	\
-           --load-ca-privkey            $CERT_ROOT/$(basename $CERT_ROOT).key	\
-           --load-ca-certificate        $CERT_ROOT/$(basename $CERT_ROOT).crt
+           --load-ca-privkey		$CERT_ROOT/$(basename $CERT_ROOT).key	\
+           --load-ca-certificate	$CERT_ROOT/$(basename $CERT_ROOT).crt
 
   [ "$LEAF" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
 
@@ -185,8 +185,8 @@ if [ $# -eq 2 ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr ]; then
            --template			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg	\
            --load-request		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr	\
            --outfile			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt	\
-           --load-ca-privkey            $CERT_ROOT/$(basename $CERT_ROOT).key	\
-           --load-ca-certificate        $CERT_ROOT/$(basename $CERT_ROOT).crt
+           --load-ca-privkey		$CERT_ROOT/$(basename $CERT_ROOT).key	\
+           --load-ca-certificate	$CERT_ROOT/$(basename $CERT_ROOT).crt
 
   [ "$LEAF" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
 
