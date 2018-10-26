@@ -63,6 +63,7 @@ done
 
 shift $(( $OPTIND - 1 ))
 
+CA_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | awk -F '/' '{print $1}')
 CERT_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
 CERT_LEAF=$(echo $2 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '.' '-' | tr -cd '0-9a-z-')
 
@@ -148,17 +149,17 @@ template ()
 
 
 
-if [ $# -eq 1 ] && [ ! -d $CERT_ROOT ]; then
+if [ $# -eq 1 ] && [ ! -d $CA_ROOT ]; then
 
-  mkdir -p $CERT_ROOT
-  certtool --generate-privkey		$ROOT_KEY_PARAMS		\
-           --outfile			$CERT_ROOT/$CERT_ROOT.key
+  mkdir -p $CA_ROOT
+  certtool --generate-privkey		$ROOT_KEY_PARAMS	\
+           --outfile			$CA_ROOT/$CA_ROOT.key
 
-  template root                       > $CERT_ROOT/$CERT_ROOT.cfg
-  certtool --generate-self-signed					\
-           --template 			$CERT_ROOT/$CERT_ROOT.cfg	\
-           --load-privkey		$CERT_ROOT/$CERT_ROOT.key	\
-           --outfile 			$CERT_ROOT/$CERT_ROOT.crt
+  template root                       > $CA_ROOT/$CA_ROOT.cfg
+  certtool --generate-self-signed				\
+           --template 			$CA_ROOT/$CA_ROOT.cfg	\
+           --load-privkey		$CA_ROOT/$CA_ROOT.key	\
+           --outfile 			$CA_ROOT/$CA_ROOT.crt
 
 fi
 
