@@ -20,6 +20,11 @@ Critical considerations for use
 Basic Usage
 -----------
 
+Download and install:
+
+$ sudo wget https://raw.githubusercontent.com/pmjdebruijn/pca/master/pca -o /usr/local/bin/pca
+$ sudo chmod 755 /usr/local/bin/pca
+
 Create a new root certification authority:
 
 $ pca -c US -o 'ACME Corporation' Anvil
