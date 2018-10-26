@@ -45,7 +45,7 @@ if [ ! -x "$(which certtool)" ]; then
   echo "$BASENAME: needs certtool (gnutls-bin) anywhere in $PATH" 1>&2 && exit 1
 fi
 
-LEAF=leaf
+MODE=leaf
 
 while getopts ':n:y:o:c:d:i' OPT "$@"; do
   case $OPT in
@@ -54,7 +54,7 @@ while getopts ':n:y:o:c:d:i' OPT "$@"; do
     o) ORGANIZATION=$OPTARG ;;
     c) COUNTRY=$OPTARG ;;
     d) DNS_NAMES=$OPTARG ;;
-    i) LEAF=inter && LEAF_KEY_PARAMS=$ROOT_KEY_PARAMS ;;
+    i) MODE=inter && LEAF_KEY_PARAMS=$ROOT_KEY_PARAMS ;;
     *)
       echo "$BASENAME: invalid option: -$OPTARG" 1>&2 && exit 1
     ;;
@@ -169,7 +169,7 @@ if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ ! -d $CERT_
   certtool --generate-privkey		$LEAF_KEY_PARAMS			\
            --outfile			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.key
 
-  template $LEAF                      > $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg
+  template $MODE                      > $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg
   certtool --generate-certificate						\
            --template			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg	\
            --load-privkey		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.key	\
@@ -177,7 +177,7 @@ if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ ! -d $CERT_
            --load-ca-privkey		$CERT_ROOT/$(basename $CERT_ROOT).key	\
            --load-ca-certificate	$CERT_ROOT/$(basename $CERT_ROOT).crt
 
-  [ "$LEAF" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
+  [ "$MODE" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
 
 fi
 
@@ -192,6 +192,6 @@ if [ $# -eq 2 ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr ]; then
            --load-ca-privkey		$CERT_ROOT/$(basename $CERT_ROOT).key	\
            --load-ca-certificate	$CERT_ROOT/$(basename $CERT_ROOT).crt
 
-  [ "$LEAF" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
+  [ "$MODE" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
 
 fi
