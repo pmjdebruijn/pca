@@ -47,7 +47,7 @@ fi
 
 MODE=leaf
 
-while getopts ':n:y:o:c:d:i' OPT "$@"; do
+while getopts ':n:y:o:c:d:ir' OPT "$@"; do
   case $OPT in
     n) NAME=$OPTARG ;;
     y) YEAR=$OPTARG ;;
@@ -55,6 +55,7 @@ while getopts ':n:y:o:c:d:i' OPT "$@"; do
     c) COUNTRY=$OPTARG ;;
     d) DNS_NAMES=$OPTARG ;;
     i) MODE=inter && LEAF_KEY_PARAMS=$ROOT_KEY_PARAMS ;;
+    r) MODE=revoke ;;
     *)
       echo "$BASENAME: invalid option: -$OPTARG" 1>&2 && exit 1
     ;;
@@ -102,6 +103,7 @@ template ()
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
+      echo "crl_next_update 365"
     ;;
     inter)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + $DEFAULT_INTER_YEARS ))}-12-31 23:59:59 UTC'"
@@ -157,13 +159,37 @@ if [ $# -eq 1 ] && [ ! -d $CA_ROOT ]; then
 
   template root                       > $CA_ROOT/$CA_ROOT.cfg
   certtool --generate-self-signed				\
-           --template 			$CA_ROOT/$CA_ROOT.cfg	\
+           --template			$CA_ROOT/$CA_ROOT.cfg	\
            --load-privkey		$CA_ROOT/$CA_ROOT.key	\
-           --outfile 			$CA_ROOT/$CA_ROOT.crt
+           --outfile			$CA_ROOT/$CA_ROOT.crt
+
+  certtool --generate-crl					\
+           --template			$CA_ROOT/$CA_ROOT.cfg	\
+           --load-ca-privkey		$CA_ROOT/$CA_ROOT.key	\
+           --load-ca-certificate	$CA_ROOT/$CA_ROOT.crt	\
+           --outfile			$CA_ROOT/$CA_ROOT.crl
+
+fi
+
+if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt ]; then
+
+  [ "$MODE" != "revoke" ] && echo "$BASENAME: Use revocation mode to revoke $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt" 1>&2 && exit 1
+
+  certtool --generate-crl							\
+           --load-crl			$CA_ROOT/$CA_ROOT.crl			\
+           --template			$CA_ROOT/$CA_ROOT.cfg			\
+           --load-ca-privkey		$CA_ROOT/$CA_ROOT.key			\
+           --load-ca-certificate	$CA_ROOT/$CA_ROOT.crt			\
+           --load-certificate		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt	\
+           --outfile			$CA_ROOT/$CA_ROOT.crlx
+
+  [ $? -eq 0 ] && mv $CA_ROOT/$CA_ROOT.crlx $CA_ROOT/$CA_ROOT.crl
 
 fi
 
 if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ ! -d $CERT_ROOT/$CERT_LEAF ]; then
+
+  [ "$MODE" = "revoke" ] && echo "$BASENAME: Missing certificate CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt cannot be revoked!" 1>&2 && exit 1
 
   mkdir -p $CERT_ROOT/$CERT_LEAF
   certtool --generate-privkey		$LEAF_KEY_PARAMS			\
@@ -181,7 +207,9 @@ if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ ! -d $CERT_
 
 fi
 
-if [ $# -eq 2 ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr ]; then
+if [ $# -eq 2 ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr ] && [ ! -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt ]; then
+
+  [ "$MODE" = "revoke" ] && echo "$BASENAME: Missing certificate CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt cannot be revoked!" 1>&2 && exit 1
 
   template sign                       > $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg
 

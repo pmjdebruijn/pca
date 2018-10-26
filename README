@@ -8,7 +8,7 @@ Important characteristics
  * Has not been exhaustively tested
  * Has not been audited by a third party
  * Depends on GNU TLS' certtool
- * Does not directly handle revocation (CRL/OCSP)
+ * Only handles basic revocation through a CRL (no OCSP)
 
 Critical considerations for use
 
