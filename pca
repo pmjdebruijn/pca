@@ -138,7 +138,7 @@ template ()
       echo "tls_www_client"
       ;;
     *)
-      echo "$BASENAME: internal $0 error, $1 unknown!" 1>&2 && exit 1
+      echo "$BASENAME: internal $0 error, $1 template unknown!" 1>&2 && exit 1
       ;;
   esac
 }
