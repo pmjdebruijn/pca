@@ -21,8 +21,6 @@ BASENAME=$(basename --suffix '.sh' $0)
 [ -f ~/.$BASENAME.conf ] && . ~/.$BASENAME.conf && echo "Configuration ~/.$BASENAME.conf loaded..."
 [ -f ./$BASENAME.conf ] && . ./$BASENAME.conf && echo "Configuration ./$BASENAME.conf loaded..."
 
-[ -f /proc/sys/kernel/random/entropy_avail ] && [ $(cat /proc/sys/kernel/random/entropy_avail) -lt 1000 ] && echo "$BASENAME: insufficient entropy available" 1>&2 && exit 1
-
 
 
 
@@ -141,6 +139,11 @@ template ()
       ;;
   esac
 }
+
+
+
+
+[ -f /proc/sys/kernel/random/entropy_avail ] && while [ $(cat /proc/sys/kernel/random/entropy_avail) -lt 1000 ]; do sleep 1; done
 
 
 
