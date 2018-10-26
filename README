@@ -45,6 +45,10 @@ Create a server certificate including multiple additional subdomains:
 
 $ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' anvil/inter example.org
 
+Revoke a certificate:
+
+$ pca -r anvil/inter example.org
+
 Show certification authority hierarchical structure:
 
 $ find -type d anvil
