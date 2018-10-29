@@ -17,14 +17,14 @@ ORGANIZATION="ACME Corporation"
 
 BASENAME=$(basename --suffix '.sh' $0)
 
-[ -f /etc/$BASENAME.conf ] && . /etc/$BASENAME.conf && echo "Configuration /etc/$BASENAME.conf loaded..."
-[ -f ~/.$BASENAME.conf ] && . ~/.$BASENAME.conf && echo "Configuration ~/.$BASENAME.conf loaded..."
-[ -f ./$BASENAME.conf ] && . ./$BASENAME.conf && echo "Configuration ./$BASENAME.conf loaded..."
+[ -f /etc/${BASENAME}.conf ] && . /etc/${BASENAME}.conf && echo "Configuration /etc/${BASENAME}.conf loaded..."
+[ -f ~/.${BASENAME}.conf ] && . ~/.${BASENAME}.conf && echo "Configuration ~/.${BASENAME}.conf loaded..."
+[ -f ./${BASENAME}.conf ] && . ./${BASENAME}.conf && echo "Configuration ./${BASENAME}.conf loaded..."
 
 
 
 
-case $ALGO in
+case ${ALGO} in
   RSA)
     ROOT_KEY_PARAMS='--rsa --bits 4096 --hash sha384'
     LEAF_KEY_PARAMS='--rsa --bits 2048 --hash sha256'
@@ -34,7 +34,7 @@ case $ALGO in
     LEAF_KEY_PARAMS='--ecdsa --curve secp256r1 --hash sha256'    # estimated sec equiv to RSA3072
     ;;
   *)
-    echo "$BASENAME: invalid ALGO: $ALGO" 1>&2 && exit 1
+    echo "${BASENAME}: invalid ALGO: ${ALGO}" 1>&2 && exit 1
     ;;
 esac
 
@@ -42,27 +42,27 @@ esac
 
 
 if [ ! -x "$(which certtool)" ]; then
-  echo "$BASENAME: needs certtool (gnutls-bin) anywhere in $PATH" 1>&2 && exit 1
+  echo "${BASENAME}: needs certtool (gnutls-bin) anywhere in ${PATH}" 1>&2 && exit 1
 fi
 
 MODE=leaf
 
 while getopts ':n:y:o:c:d:ir' OPT "$@"; do
-  case $OPT in
-    n) NAME=$OPTARG ;;
-    y) YEAR=$OPTARG ;;
-    o) ORGANIZATION=$OPTARG ;;
-    c) COUNTRY=$OPTARG ;;
-    d) DNS_NAMES=$OPTARG ;;
-    i) MODE=inter && LEAF_KEY_PARAMS=$ROOT_KEY_PARAMS ;;
+  case ${OPT} in
+    n) NAME=${OPTARG} ;;
+    y) YEAR=${OPTARG} ;;
+    o) ORGANIZATION=${OPTARG} ;;
+    c) COUNTRY=${OPTARG} ;;
+    d) DNS_NAMES=${OPTARG} ;;
+    i) MODE=inter && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS} ;;
     r) MODE=revoke ;;
     *)
-      echo "$BASENAME: invalid option: -$OPTARG" 1>&2 && exit 1
+      echo "${BASENAME}: invalid option: -${OPTARG}" 1>&2 && exit 1
     ;;
   esac
 done
 
-shift $(( $OPTIND - 1 ))
+shift $(( ${OPTIND} - 1 ))
 
 CA_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | awk -F '/' '{print $1}')
 CERT_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
@@ -78,13 +78,13 @@ fullchain ()
 {
   local D=$1
 
-  while [ "$D" != "" ]; do
-    if [ -f $D/$(basename $D).crt ]; then
-      cat $D/$(basename $D).crt
+  while [ "${D}" != "" ]; do
+    if [ -f ${D}/$(basename ${D}).crt ]; then
+      cat ${D}/$(basename ${D}).crt
     else
-      echo "$BASENAME: missing certificate $D/$(basename $D).crt" 1>&2 && exit 1
+      echo "$BASENAME: missing certificate ${D}/$(basename ${D}).crt" 1>&2 && exit 1
     fi
-    D=$(echo $D | sed "s#/\?$(basename $D)\$##g")
+    D=$(echo ${D} | sed "s#/\?$(basename ${D})\$##g")
   done
 }
 
@@ -95,10 +95,10 @@ template ()
 {
   case $1 in
     root)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + $DEFAULT_ROOT_YEARS ))}-12-31 23:59:59 UTC'"
-      echo "organization = '$ORGANIZATION'"
-      echo "country = $COUNTRY"
-      echo "cn = '${NAME:-$CERT_ROOT_NAME Private $ALGO Root Certification Authority $(date +%Y)}'"
+      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 UTC'"
+      echo "organization = '${ORGANIZATION}'"
+      echo "country = ${COUNTRY}"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Root Certification Authority $(date +%Y)}'"
       echo "#path_len = 1"
       echo "ca"
       echo "cert_signing_key"
@@ -106,23 +106,23 @@ template ()
       echo "crl_next_update 365"
     ;;
     inter)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + $DEFAULT_INTER_YEARS ))}-12-31 23:59:59 UTC'"
-      echo "organization = '$ORGANIZATION'"
-      echo "country = $COUNTRY"
-      echo "cn = '${NAME:-$CERT_ROOT_NAME Private $ALGO Intermediate Certification Authority $(date +%Y)}'"
+      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 UTC'"
+      echo "organization = '${ORGANIZATION}'"
+      echo "country = ${COUNTRY}"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Intermediate Certification Authority $(date +%Y)}'"
       echo "#path_len = 0"
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
       ;;
     leaf)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + $DEFAULT_LEAF_YEARS ))}-12-31 23:59:59 UTC'"
-      echo "organization = '$ORGANIZATION'"
-      echo "country = $COUNTRY"
-      echo "cn = '${NAME:-$CERT_LEAF_NAME}'"
-      echo "dns_name = '${NAME:-$CERT_LEAF_NAME}'"	# Subject Alternative Name
-      for DNS_NAME in $DNS_NAMES; do
-        echo "dns_name = '$DNS_NAME'"			# Subject Alternative Name
+      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
+      echo "organization = '${ORGANIZATION}'"
+      echo "country = ${COUNTRY}"
+      echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
+      echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"	# Subject Alternative Name
+      for DNS_NAME in ${DNS_NAMES}; do
+        echo "dns_name = '${DNS_NAME}'"			# Subject Alternative Name
       done
       echo "signing_key"
       echo "encryption_key"
@@ -130,7 +130,7 @@ template ()
       echo "tls_www_client"
       ;;
     sign)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + $DEFAULT_LEAF_YEARS ))}-12-31 23:59:59 UTC'"
+      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "honor_crq_ext = 2.5.29.17"			# Subject Alternative Name
       echo "signing_key"
       echo "encryption_key"
@@ -138,7 +138,7 @@ template ()
       echo "tls_www_client"
       ;;
     *)
-      echo "$BASENAME: internal $0 error, $1 template unknown!" 1>&2 && exit 1
+      echo "${BASENAME}: internal $0 error, $1 template unknown!" 1>&2 && exit 1
       ;;
   esac
 }
@@ -151,75 +151,75 @@ template ()
 
 
 
-if [ $# -eq 1 ] && [ ! -d $CA_ROOT ]; then
+if [ $# -eq 1 ] && [ ! -d ${CA_ROOT} ]; then
 
-  mkdir -p $CA_ROOT
-  certtool --generate-privkey		$ROOT_KEY_PARAMS	\
-           --outfile			$CA_ROOT/$CA_ROOT.key
+  mkdir -p ${CA_ROOT}
+  certtool --generate-privkey		${ROOT_KEY_PARAMS}		\
+           --outfile			${CA_ROOT}/${CA_ROOT}.key
 
-  template root                       > $CA_ROOT/$CA_ROOT.cfg
-  certtool --generate-self-signed				\
-           --template			$CA_ROOT/$CA_ROOT.cfg	\
-           --load-privkey		$CA_ROOT/$CA_ROOT.key	\
-           --outfile			$CA_ROOT/$CA_ROOT.crt
+  template root			      > ${CA_ROOT}/${CA_ROOT}.cfg
+  certtool --generate-self-signed					\
+           --template			${CA_ROOT}/${CA_ROOT}.cfg	\
+           --load-privkey		${CA_ROOT}/${CA_ROOT}.key	\
+           --outfile			${CA_ROOT}/${CA_ROOT}.crt
 
-  certtool --generate-crl					\
-           --template			$CA_ROOT/$CA_ROOT.cfg	\
-           --load-ca-privkey		$CA_ROOT/$CA_ROOT.key	\
-           --load-ca-certificate	$CA_ROOT/$CA_ROOT.crt	\
-           --outfile			$CA_ROOT/$CA_ROOT.crl
+  certtool --generate-crl						\
+           --template			${CA_ROOT}/${CA_ROOT}.cfg	\
+           --load-ca-privkey		${CA_ROOT}/${CA_ROOT}.key	\
+           --load-ca-certificate	${CA_ROOT}/${CA_ROOT}.crt	\
+           --outfile			${CA_ROOT}/${CA_ROOT}.crl
 
 fi
 
-if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt ]; then
+if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
-  [ "$MODE" != "revoke" ] && echo "$BASENAME: Use revocation mode to revoke $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt" 1>&2 && exit 1
+  [ "${MODE}" != "revoke" ] && echo "${BASENAME}: Use revocation mode to revoke ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt" 1>&2 && exit 1
 
   certtool --generate-crl							\
-           --load-crl			$CA_ROOT/$CA_ROOT.crl			\
-           --template			$CA_ROOT/$CA_ROOT.cfg			\
-           --load-ca-privkey		$CA_ROOT/$CA_ROOT.key			\
-           --load-ca-certificate	$CA_ROOT/$CA_ROOT.crt			\
-           --load-certificate		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt	\
-           --outfile			$CA_ROOT/$CA_ROOT.crlx
+           --load-crl			${CA_ROOT}/${CA_ROOT}.crl			\
+           --template			${CA_ROOT}/${CA_ROOT}.cfg			\
+           --load-ca-privkey		${CA_ROOT}/${CA_ROOT}.key			\
+           --load-ca-certificate	${CA_ROOT}/${CA_ROOT}.crt			\
+           --load-certificate		${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt	\
+           --outfile			${CA_ROOT}/${CA_ROOT}.crlx
 
-  [ $? -eq 0 ] && mv $CA_ROOT/$CA_ROOT.crlx $CA_ROOT/$CA_ROOT.crl
-
-fi
-
-if [ $# -eq 2 ] && [ -f $CERT_ROOT/$(basename $CERT_ROOT).key ] && [ ! -d $CERT_ROOT/$CERT_LEAF ]; then
-
-  [ "$MODE" = "revoke" ] && echo "$BASENAME: Missing certificate CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt cannot be revoked!" 1>&2 && exit 1
-
-  mkdir -p $CERT_ROOT/$CERT_LEAF
-  certtool --generate-privkey		$LEAF_KEY_PARAMS			\
-           --outfile			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.key
-
-  template $MODE                      > $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg
-  certtool --generate-certificate						\
-           --template			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg	\
-           --load-privkey		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.key	\
-           --outfile			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt	\
-           --load-ca-privkey		$CERT_ROOT/$(basename $CERT_ROOT).key	\
-           --load-ca-certificate	$CERT_ROOT/$(basename $CERT_ROOT).crt
-
-  [ "$MODE" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
+  [ $? -eq 0 ] && mv ${CA_ROOT}/${CA_ROOT}.crlx ${CA_ROOT}/${CA_ROOT}.crl
 
 fi
 
-if [ $# -eq 2 ] && [ -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr ] && [ ! -f $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt ]; then
+if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ ! -d ${CERT_ROOT}/${CERT_LEAF} ]; then
 
-  [ "$MODE" = "revoke" ] && echo "$BASENAME: Missing certificate CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt cannot be revoked!" 1>&2 && exit 1
+  [ "${MODE}" = "revoke" ] && echo "${BASENAME}: Missing certificate ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt cannot be revoked!" 1>&2 && exit 1
 
-  template sign                       > $CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg
+  mkdir -p ${CERT_ROOT}/${CERT_LEAF}
+  certtool --generate-privkey		${LEAF_KEY_PARAMS}				\
+           --outfile			${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key
 
-  certtool --generate-certificate	$LEAF_KEY_PARAMS			\
-           --template			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.cfg	\
-           --load-request		$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.csr	\
-           --outfile			$CERT_ROOT/$CERT_LEAF/$CERT_LEAF.crt	\
-           --load-ca-privkey		$CERT_ROOT/$(basename $CERT_ROOT).key	\
-           --load-ca-certificate	$CERT_ROOT/$(basename $CERT_ROOT).crt
+  template ${MODE}		      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  certtool --generate-certificate							\
+           --template			${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg	\
+           --load-privkey		${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key	\
+           --outfile			${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt	\
+           --load-ca-privkey		${CERT_ROOT}/$(basename ${CERT_ROOT}).key	\
+           --load-ca-certificate	${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "$MODE" = "leaf" ] && fullchain $CERT_ROOT/$CERT_LEAF > $CERT_ROOT/$CERT_LEAF/fullchain.crt
+  [ "${MODE}" = "leaf" ] && fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
+
+fi
+
+if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] && [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
+
+  [ "${MODE}" = "revoke" ] && echo "${BASENAME}: Missing certificate ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt cannot be revoked!" 1>&2 && exit 1
+
+  template sign			      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+
+  certtool --generate-certificate	${LEAF_KEY_PARAMS}			\
+           --template			${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg	\
+           --load-request		${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr	\
+           --outfile			${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt	\
+           --load-ca-privkey		${CERT_ROOT}/$(basename ${CERT_ROOT}).key	\
+           --load-ca-certificate	${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
+
+  [ "$MODE" = "leaf" ] && fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
 
 fi
