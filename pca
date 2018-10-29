@@ -183,13 +183,11 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CE
            --load-certificate		${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt	\
            --outfile			${CA_ROOT}/${CA_ROOT}.crlx
 
-  [ $? -eq 0 ] && mv ${CA_ROOT}/${CA_ROOT}.crlx ${CA_ROOT}/${CA_ROOT}.crl
+  [ $? -eq 0 ] && mv ${CA_ROOT}/${CA_ROOT}.crlx ${CA_ROOT}/${CA_ROOT}.crl && mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED
 
 fi
 
-if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ ! -d ${CERT_ROOT}/${CERT_LEAF} ]; then
-
-  [ "${MODE}" = "revoke" ] && echo "${BASENAME}: Missing certificate ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt cannot be revoked!" 1>&2 && exit 1
+if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ ! -d ${CERT_ROOT}/${CERT_LEAF} ] && [ "${MODE}" != "revoke" ]; then
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
   certtool --generate-privkey		${LEAF_KEY_PARAMS}				\
@@ -207,9 +205,7 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ ! -d ${
 
 fi
 
-if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] && [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
-
-  [ "${MODE}" = "revoke" ] && echo "${BASENAME}: Missing certificate ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt cannot be revoked!" 1>&2 && exit 1
+if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] && [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ] && [ "${MODE}" != "revoke" ]; then
 
   template sign			      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
