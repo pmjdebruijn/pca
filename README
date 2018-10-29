@@ -22,6 +22,7 @@ Basic Usage
 
 Download and install:
 
+$ sudo apt-get install gnutls-bin
 $ sudo wget https://raw.githubusercontent.com/pmjdebruijn/pca/master/pca -o /usr/local/bin/pca
 $ sudo chmod 755 /usr/local/bin/pca
 
@@ -45,6 +46,12 @@ Create a server certificate including multiple additional subdomains:
 
 $ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' anvil/inter example.org
 
+Create multiple server certificates with the same domain name:
+
+$ pca -n www.example.org anvil/inter www.example.org_1
+$ pca -n www.example.org anvil/inter www.example.org_2
+$ pca -n www.example.org anvil/inter www.example.org_3
+
 Revoke a certificate:
 
 $ pca -r anvil/inter example.org
@@ -56,6 +63,6 @@ $ find -type d anvil
 ./anvil/inter
 ./anvil/inter/example-org
 
-Note that the last parameter is used for a certificates' CN as-is, including capitilisation and spaces if quotes are used.
-The script also uses the last parameter for its directory structure (but applies some normalisation like caps removal).
+Note that the last parameter is used for a certificates' CN as-is, including capitilisation and spaces if quoted are used.
+The script also uses the last parameter for its directory structure (but applies some normalisation, like caps removal).
 Therefore the authorities can be referred to using their normalised names after they have been created.
