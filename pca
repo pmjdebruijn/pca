@@ -81,7 +81,7 @@ fullchain ()
     if [ -f ${D}/$(basename ${D}).crt ]; then
       cat ${D}/$(basename ${D}).crt
     else
-      echo "$BASENAME: missing certificate ${D}/$(basename ${D}).crt" 1>&2 && exit 1
+      echo "${BASENAME}: missing certificate ${D}/$(basename ${D}).crt" 1>&2 && exit 1
     fi
     D=$(echo ${D} | sed "s#/\?$(basename ${D})\$##g")
   done
