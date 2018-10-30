@@ -64,7 +64,6 @@ done
 
 shift $(( ${OPTIND} - 1 ))
 
-CA_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | awk -F '/' '{print $1}')
 CERT_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
 CERT_LEAF=$(echo $2 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '.' '-' | tr -cd '0-9a-z-')
 
@@ -151,23 +150,23 @@ template ()
 
 
 
-if [ $# -eq 1 ] && [ ! -d ${CA_ROOT} ]; then
+if [ $# -eq 1 ] && [ ! -d ${CERT_ROOT} ]; then
 
-  mkdir -p ${CA_ROOT}
+  mkdir -p ${CERT_ROOT}
   certtool --generate-privkey		${ROOT_KEY_PARAMS}		\
-           --outfile			${CA_ROOT}/${CA_ROOT}.key
+           --outfile			${CERT_ROOT}/${CERT_ROOT}.key
 
-  template root			      > ${CA_ROOT}/${CA_ROOT}.cfg
+  template root			      > ${CERT_ROOT}/${CERT_ROOT}.cfg
   certtool --generate-self-signed					\
-           --template			${CA_ROOT}/${CA_ROOT}.cfg	\
-           --load-privkey		${CA_ROOT}/${CA_ROOT}.key	\
-           --outfile			${CA_ROOT}/${CA_ROOT}.crt
+           --template			${CERT_ROOT}/${CERT_ROOT}.cfg	\
+           --load-privkey		${CERT_ROOT}/${CERT_ROOT}.key	\
+           --outfile			${CERT_ROOT}/${CERT_ROOT}.crt
 
   certtool --generate-crl						\
-           --template			${CA_ROOT}/${CA_ROOT}.cfg	\
-           --load-ca-privkey		${CA_ROOT}/${CA_ROOT}.key	\
-           --load-ca-certificate	${CA_ROOT}/${CA_ROOT}.crt	\
-           --outfile			${CA_ROOT}/${CA_ROOT}.crl
+           --template			${CERT_ROOT}/${CERT_ROOT}.cfg	\
+           --load-ca-privkey		${CERT_ROOT}/${CERT_ROOT}.key	\
+           --load-ca-certificate	${CERT_ROOT}/${CERT_ROOT}.crt	\
+           --outfile			${CERT_ROOT}/${CERT_ROOT}.crl
 
 fi
 
@@ -175,19 +174,19 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CE
 
   [ "${MODE}" != "revoke" ] && echo "${BASENAME}: Use revocation mode to revoke ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt" 1>&2 && exit 1
 
-  certtool --generate-crl							\
-           --load-crl			${CA_ROOT}/${CA_ROOT}.crl			\
-           --template			${CA_ROOT}/${CA_ROOT}.cfg			\
-           --load-ca-privkey		${CA_ROOT}/${CA_ROOT}.key			\
-           --load-ca-certificate	${CA_ROOT}/${CA_ROOT}.crt			\
+  certtool --generate-crl								\
+           --load-crl			${CERT_ROOT}/$(basename ${CERT_ROOT}).crl	\
+           --template			${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg	\
+           --load-ca-privkey		${CERT_ROOT}/$(basename ${CERT_ROOT}).key	\
+           --load-ca-certificate	${CERT_ROOT}/$(basename ${CERT_ROOT}).crt	\
            --load-certificate		${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt	\
-           --outfile			${CA_ROOT}/${CA_ROOT}.crlx
+           --outfile			${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx
 
-  [ $? -eq 0 ] && mv ${CA_ROOT}/${CA_ROOT}.crlx ${CA_ROOT}/${CA_ROOT}.crl && mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED
+  [ $? -eq 0 ] && mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl && mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED
 
 fi
 
-if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ ! -d ${CERT_ROOT}/${CERT_LEAF} ] && [ "${MODE}" != "revoke" ]; then
+if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] && [ ! -d ${CERT_ROOT}/${CERT_LEAF} ] && [ "${MODE}" != "revoke" ]; then
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
   certtool --generate-privkey		${LEAF_KEY_PARAMS}				\
@@ -200,6 +199,13 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ ! -d ${
            --outfile			${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt	\
            --load-ca-privkey		${CERT_ROOT}/$(basename ${CERT_ROOT}).key	\
            --load-ca-certificate	${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
+
+  [ "${MODE}" = "inter" ] && \
+  certtool --generate-crl								 \
+           --template                   ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg       \
+           --load-ca-privkey            ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key       \
+           --load-ca-certificate        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt       \
+           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
   [ "${MODE}" = "leaf" ] && fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
 
