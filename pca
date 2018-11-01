@@ -73,6 +73,14 @@ CERT_LEAF_NAME=$2
 
 
 
+genpass ()
+{
+  head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01il5S8B' | tail -c 24 | tee $1
+}
+
+
+
+
 fullchain ()
 {
   local D=$1
@@ -207,7 +215,16 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CE
            --load-ca-certificate        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt      \
            --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
-  [ "${MODE}" = "leaf" ] && fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
+  [ "${MODE}" = "leaf" ] &&                                                             \
+  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
+
+  [ "${MODE}" = "leaf" ] &&                                                             \
+  certtool --to-p12 --outder                                                            \
+           --p12-name ${CERT_LEAF}                                                      \
+           --load-privkey ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key                    \
+           --load-certificate ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt                   \
+           --outfile ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.pfx                         \
+           --password $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.txt)
 
 fi
 
