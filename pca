@@ -75,7 +75,7 @@ CERT_LEAF_NAME=$2
 
 genpass ()
 {
-  head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01il5S8B' | tail -c 24 | tee $1
+  echo $(head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01il5S8B' | tail -c 24) | tee -a $1
 }
 
 
