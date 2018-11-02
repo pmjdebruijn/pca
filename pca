@@ -255,6 +255,6 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --p12-name                   ${CERT_LEAF}                                        \
            --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
            --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
-           --password password          # Windows compliance
+           --password          password # Windows compliance
 
 fi
