@@ -158,7 +158,8 @@ template ()
 
 
 
-if [ $# -eq 1 ] && [ ! -d ${CERT_ROOT} ]; then
+if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                         \
+   [ ! -d ${CERT_ROOT} ]; then
 
   mkdir -p ${CERT_ROOT}
   certtool --generate-privkey           ${ROOT_KEY_PARAMS}              \
@@ -178,7 +179,9 @@ if [ $# -eq 1 ] && [ ! -d ${CERT_ROOT} ]; then
 
 fi
 
-if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
+if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                              \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                   \
+   [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
   [ "${MODE}" != "revoke" ] && echo "${BASENAME}: Use revocation mode to revoke ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt" 1>&2 && exit 1
 
@@ -194,7 +197,10 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CE
 
 fi
 
-if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] && [ ! -d ${CERT_ROOT}/${CERT_LEAF} ] && [ "${MODE}" != "revoke" ]; then
+if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                             \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                    \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                    \
+   [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
   certtool --generate-privkey           ${LEAF_KEY_PARAMS}                                  \
@@ -228,7 +234,9 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CE
 
 fi
 
-if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] && [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ] && [ "${MODE}" != "revoke" ]; then
+if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                             \
+   [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                   \
+   [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
   template sign                       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
