@@ -242,4 +242,11 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] && [ ! -f $
   [ "$MODE" = "leaf" ] &&                                                               \
   fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
 
+  [ "${MODE}" = "leaf" ] &&                                                             \
+  certtool --to-p12 --outder                                                            \
+           --p12-name ${CERT_LEAF}                                                      \
+           --load-certificate ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt                   \
+           --outfile ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.pfx                         \
+           --password password
+
 fi
