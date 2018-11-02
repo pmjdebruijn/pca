@@ -47,18 +47,26 @@ fi
 
 MODE=leaf
 
-while getopts ':n:y:o:c:d:ir' OPT "$@"; do
+while getopts ':n:d:y:o:c:ir' OPT "$@"; do
   case ${OPT} in
     n) NAME=${OPTARG} ;;
+    d) DNS_NAMES=${OPTARG} ;;
     y) YEAR=${OPTARG} ;;
     o) ORGANIZATION=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
-    d) DNS_NAMES=${OPTARG} ;;
     i) MODE=inter && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS} ;;
     r) MODE=revoke ;;
     *)
-      echo "${BASENAME}: invalid option: -${OPTARG}" 1>&2 && exit 1
-    ;;
+      echo "Usage: ${BASENAME} [OPTION] CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]"    2>&1
+      echo "           -n  primary domain name (common name)"                        2>&1
+      echo "           -d  additional domain names (dns san)"                        2>&1
+      echo "           -y  year (valid up to and including)"                         2>&1
+      echo "           -o  organisation name"                                        2>&1
+      echo "           -c  country code (iso)"                                       2>&1
+      echo "           -i  generate an intermediate certificate authority"           2>&1
+      echo "           -r  revoke certificate"                                       2>&1
+      exit 1
+      ;;
   esac
 done
 
