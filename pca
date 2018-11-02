@@ -255,7 +255,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-privkey            ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
            --load-ca-certificate        ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "$MODE" = "leaf" ] &&                                                                   \
+  [ "${MODE}" = "leaf" ] &&                                                                 \
   fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
 
   [ "${MODE}" = "leaf" ] &&                                                                 \
