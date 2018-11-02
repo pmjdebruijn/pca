@@ -116,7 +116,7 @@ template ()
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
       echo "country = ${COUNTRY}"
-      echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Intermediate Certification Authority $(date +%Y)}'"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME} ${CERT_LEAF_NAME} $ALGO Intermediate Certification Authority $(date +%Y)}'"
       echo "#path_len = 0"
       echo "ca"
       echo "cert_signing_key"

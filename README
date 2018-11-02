@@ -32,36 +32,36 @@ $ pca -c US -o 'ACME Corporation' Anvil
 
 Create a new (optional) intermediate certification authority (under our previously created root):
 
-$ pca -c US -o 'ACME Corporation' -i Anvil inter
+$ pca -c US -o 'ACME Corporation' -i Anvil Hammer
 
 Create a simple server certificate:
 
-$ pca -c US -o 'Example, Inc.' anvil/inter example.org
+$ pca -c US -o 'Example, Inc.' anvil/hammer example.org
 
 Create a server certificate including an additional subdomain:
 
-$ pca -c US -o 'Example, Inc.' -d www.example.org anvil/inter example.org
+$ pca -c US -o 'Example, Inc.' -d www.example.org anvil/hammer example.org
 
 Create a server certificate including multiple additional subdomains:
 
-$ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' anvil/inter example.org
+$ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' anvil/hammer example.org
 
 Create multiple server certificates with the same domain name:
 
-$ pca -n www.example.org anvil/inter www.example.org_1
-$ pca -n www.example.org anvil/inter www.example.org_2
-$ pca -n www.example.org anvil/inter www.example.org_3
+$ pca -n www.example.org anvil/hammer www.example.org_1
+$ pca -n www.example.org anvil/hammer www.example.org_2
+$ pca -n www.example.org anvil/hammer www.example.org_3
 
 Revoke a certificate:
 
-$ pca -r anvil/inter example.org
+$ pca -r anvil/hammer example.org
 
 Show certification authority hierarchical structure:
 
 $ find -type d anvil
 ./anvil
-./anvil/inter
-./anvil/inter/example-org
+./anvil/hammer
+./anvil/hammer/example-org
 
 Note that the last parameter is used for a certificates' CN as-is, including capitilisation and spaces if quoted are used.
 The script also uses the last parameter for its directory structure (but applies some normalisation, like caps removal).
