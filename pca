@@ -216,15 +216,15 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] && [ -f ${CE
            --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
   [ "${MODE}" = "leaf" ] &&                                                             \
-  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
+  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
 
   [ "${MODE}" = "leaf" ] &&                                                             \
   certtool --to-p12 --outder                                                            \
            --p12-name ${CERT_LEAF}                                                      \
            --load-privkey ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key                    \
-           --load-certificate ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt                   \
-           --outfile ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.pfx                         \
-           --password $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.txt)
+           --load-certificate ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt          \
+           --outfile ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx                   \
+           --password $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt)
 
 fi
 
@@ -240,13 +240,13 @@ if [ $# -eq 2 ] && [ -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] && [ ! -f $
            --load-ca-certificate        ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
   [ "$MODE" = "leaf" ] &&                                                               \
-  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt
+  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
 
   [ "${MODE}" = "leaf" ] &&                                                             \
   certtool --to-p12 --outder                                                            \
            --p12-name ${CERT_LEAF}                                                      \
-           --load-certificate ${CERT_ROOT}/${CERT_LEAF}/fullchain.crt                   \
-           --outfile ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.pfx                         \
+           --load-certificate ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt          \
+           --outfile ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx                   \
            --password password
 
 fi
