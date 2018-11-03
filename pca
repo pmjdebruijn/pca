@@ -195,8 +195,6 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                   \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
-  [ "${MODE}" != "revoke" ] && echo "${BASENAME}: Use revocation mode to revoke ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt" 1>&2 && exit 1
-
   certtool --generate-crl                                                                   \
            --load-crl                   ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
            --template                   ${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg           \
@@ -205,7 +203,10 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
            --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
            --outfile                    ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx
 
-  [ $? -eq 0 ] && mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl && mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED
+  if [ $? -eq 0 ]; then
+    mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
+    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED
+  fi
 
 fi
 
