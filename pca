@@ -205,7 +205,7 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
 
   if [ $? -eq 0 ]; then
     mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
-    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED
+    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
   fi
 
 fi
