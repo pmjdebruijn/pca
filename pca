@@ -41,9 +41,12 @@ esac
 
 
 
-if [ ! -x "$(which certtool)" ]; then
-  echo "${BASENAME}: needs certtool (gnutls-bin) anywhere in ${PATH}" 1>&2 && exit 1
-fi
+[ ! -x "$(which certtool)" ] && echo "${BASENAME} needs certtool (gnutls-bin) anywhere in ${PATH}" 1>&2 && exit 1
+
+[ ! -x "$(which gpg)" ] && echo "${BASENAME} needs gpg (gnupg) anywhere in ${PATH}" 1>&2 && exit 1
+
+
+
 
 MODE=leaf
 
@@ -83,7 +86,7 @@ CERT_LEAF_NAME=$2
 
 genpass ()
 {
-  echo $(head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01iIl5S8B' | tail -c 24) | tee -a $1
+  echo $(head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01iIl5S8B' | tail -c 24) | tee $1
   [ -f $1 ] && chmod 600 $1
 }
 
@@ -244,6 +247,16 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
            --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
            --password         $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt)
+
+  [ "${MODE}" = "leaf" ] &&                                                                 \
+  tar --create --file - --owner=0 --group=0                                                 \
+      --directory                       ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
+                                                                  ${CERT_LEAF}.crt          \
+                                                                  ${CERT_LEAF}.chain.crt    \
+        | gpg --quiet --symmetric --armor                                                   \
+              --compress-algo Uncompressed --digest-algo SHA256 --cipher-algo AES128        \
+              --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt    \
+                                      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.asc
 
 fi
 
