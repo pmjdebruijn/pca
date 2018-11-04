@@ -95,6 +95,8 @@ gitcommit ()
   git -C ${CA_ROOT} add --all
   git -C ${CA_ROOT} commit --quiet --all --message "$1: $2" --message "$(git -C ${CA_ROOT} status --porcelain)" \
       --author "$(getent passwd ${SUDO_USER:-${USER}} | cut -d ':' -f 5 | cut -d ',' -f 1) <${SUDO_USER:-${USER}}@$(hostname -f)>"
+
+  chmod 700 ${CA_ROOT}/.git
 }
 
 
