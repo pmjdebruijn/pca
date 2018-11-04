@@ -277,8 +277,8 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --password               $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.txt)
 
   [ "${MODE}" = "leaf" ] &&                                                                       \
-  tar --create --file - --owner=0 --group=0                                                       \
-      --directory                             ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
+  tar      --create --owner=0 --group=0                                                           \
+           --file - --directory               ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
                                                                         ${CERT_LEAF}.crt          \
                                                                         ${CERT_LEAF}.bundle.crt   \
               | gpg --quiet --symmetric --armor                                                   \
