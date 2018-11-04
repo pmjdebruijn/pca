@@ -45,6 +45,8 @@ esac
 
 [ ! -x "$(which gpg)" ] && echo "${BASENAME} needs gpg (gnupg) anywhere in ${PATH}" 1>&2 && exit 1
 
+[ ! -x "$(which git)" ] && echo "${BASENAME} needs git (git) anywhere in ${PATH}" 1>&2 && exit 1
+
 
 
 
@@ -75,11 +77,24 @@ done
 
 shift $(( ${OPTIND} - 1 ))
 
+CA_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | cut -d '/' -f 1)
 CERT_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
 CERT_LEAF=$(echo $2 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '.' '-' | tr -cd '0-9a-z-')
 
 CERT_ROOT_NAME=$1
 CERT_LEAF_NAME=$2
+
+
+
+
+gitcommit ()
+{
+  git -C ${CA_ROOT} init --quiet
+  git -C ${CA_ROOT} add --all
+  git -C ${CA_ROOT} commit --quiet --all --message "$1: $2" --message "$(git -C ${CA_ROOT} status --porcelain)" \
+      --author "$(getent passwd ${SUDO_USER:-${USER}} | cut -d ':' -f 5 | cut -d ',' -f 1) <${SUDO_USER:-${USER}}@$(hostname -f)>"
+}
+
 
 
 
@@ -194,6 +209,8 @@ if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-certificate              ${CERT_ROOT}/${CERT_ROOT}.crt                       \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crl
 
+  gitcommit "new root"                        ${CERT_ROOT}
+
 fi
 
 if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                                    \
@@ -212,6 +229,8 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
     mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
     mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
   fi
+
+  gitcommit "revoke"                          ${CERT_ROOT}/${CERT_LEAF}
 
 fi
 
@@ -262,6 +281,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-certificate              ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
+  gitcommit "new $MODE"                       ${CERT_ROOT}/${CERT_LEAF}
 
 fi
 
@@ -289,5 +309,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --password                password # Windows compliance
 
   (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
+
+  gitcommit "sign"                            ${CERT_ROOT}/${CERT_LEAF}
 
 fi
