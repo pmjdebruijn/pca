@@ -52,7 +52,7 @@ esac
 
 MODE=leaf
 
-while getopts ':n:d:y:o:c:ir' OPT "$@"; do
+while getopts ':n:d:y:o:c:irf' OPT "$@"; do
   case ${OPT} in
     n) NAME=${OPTARG} ;;
     d) DNS_NAMES=${OPTARG} ;;
@@ -61,6 +61,7 @@ while getopts ':n:d:y:o:c:ir' OPT "$@"; do
     c) COUNTRY=${OPTARG} ;;
     i) MODE=inter && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS} ;;
     r) MODE=revoke ;;
+    f) FORCE=IAMSURE ;;
     *)
       echo "Usage: ${BASENAME} [OPTION] CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]"    2>&1
       echo "           -n  primary domain name (common name)"                        2>&1
@@ -70,6 +71,7 @@ while getopts ':n:d:y:o:c:ir' OPT "$@"; do
       echo "           -c  country code (iso)"                                       2>&1
       echo "           -i  generate an intermediate certificate authority"           2>&1
       echo "           -r  revoke certificate"                                       2>&1
+      echo "           -f  force certificate signing request"                        2>&1
       exit 1
       ;;
   esac
@@ -303,6 +305,11 @@ fi
 if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
+
+  certtool --crq-info --infile                ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr
+
+  [ "${FORCE}" != "IAMSURE" ] && read -p "Do you want to sign the above certificate signing request? (Type IAMSURE to continue): " FORCE
+  [ "${FORCE}" != "IAMSURE" ] && echo "Aborting" 1>&2 && exit 1
 
   template sign                             > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
