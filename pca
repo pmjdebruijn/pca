@@ -118,7 +118,7 @@ crlbundle ()
 
 
 
-fullchain ()
+crtbundle ()
 {
   local D=$1
 
@@ -266,25 +266,25 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
   [ "${MODE}" = "leaf" ] &&                                                                       \
-  fullchain ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
+  crtbundle ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt
 
   [ "${MODE}" = "leaf" ] &&                                                                       \
   certtool --to-p12 --outder                                                                      \
            --p12-name                         ${CERT_LEAF}                                        \
            --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
-           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
-           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
-           --password               $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt)
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt   \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.pfx   \
+           --password               $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.txt)
 
   [ "${MODE}" = "leaf" ] &&                                                                       \
   tar --create --file - --owner=0 --group=0                                                       \
       --directory                             ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
                                                                         ${CERT_LEAF}.crt          \
-                                                                        ${CERT_LEAF}.chain.crt    \
+                                                                        ${CERT_LEAF}.bundle.crt   \
               | gpg --quiet --symmetric --armor                                                   \
                     --compress-algo Uncompressed --digest-algo SHA256 --cipher-algo AES128        \
-                    --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt    \
-                                            > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.asc
+                    --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.txt   \
+                                            > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.asc
 
   (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
@@ -321,13 +321,13 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
   [ "${MODE}" = "leaf" ] &&                                                                       \
-  fullchain ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
+  crtbundle ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt
 
   [ "${MODE}" = "leaf" ] &&                                                                       \
   certtool --to-p12 --outder                                                                      \
            --p12-name                         ${CERT_LEAF}                                        \
-           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
-           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt   \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.pfx   \
            --password                password # Windows compliance
 
   (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
