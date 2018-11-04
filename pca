@@ -108,6 +108,14 @@ genpass ()
 
 
 
+crlbundle ()
+{
+  cat $(find ${CA_ROOT} -name "*.crl" -type f | sort) > ${CA_ROOT}/${CA_ROOT}.bundle.crl
+}
+
+
+
+
 fullchain ()
 {
   local D=$1
@@ -209,6 +217,8 @@ if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-certificate              ${CERT_ROOT}/${CERT_ROOT}.crt                       \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crl
 
+  crlbundle
+
   gitcommit "new root"                        ${CERT_ROOT}
 
 fi
@@ -229,6 +239,8 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
     mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
     mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
   fi
+
+  crlbundle
 
   gitcommit "revoke"                          ${CERT_ROOT}/${CERT_LEAF}
 
@@ -280,6 +292,9 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-privkey                  ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
            --load-ca-certificate              ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
+
+  [ "${MODE}" = "inter" ] &&                                                                      \
+  crlbundle
 
   gitcommit "new $MODE"                       ${CERT_ROOT}/${CERT_LEAF}
 
