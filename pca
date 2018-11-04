@@ -173,40 +173,40 @@ template ()
 
 
 
-if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                         \
+if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [ ! -d ${CERT_ROOT} ]; then
 
   mkdir -p ${CERT_ROOT}
-  certtool --generate-privkey           ${ROOT_KEY_PARAMS}              \
-           --outfile                    ${CERT_ROOT}/${CERT_ROOT}.key
+  certtool --generate-privkey                 ${ROOT_KEY_PARAMS}                                  \
+           --outfile                          ${CERT_ROOT}/${CERT_ROOT}.key
 
-  template root                       > ${CERT_ROOT}/${CERT_ROOT}.cfg
-  certtool --generate-self-signed                                       \
-           --template                   ${CERT_ROOT}/${CERT_ROOT}.cfg   \
-           --load-privkey               ${CERT_ROOT}/${CERT_ROOT}.key   \
-           --outfile                    ${CERT_ROOT}/${CERT_ROOT}.crt
+  template root                             > ${CERT_ROOT}/${CERT_ROOT}.cfg
+  certtool --generate-self-signed                                                                 \
+           --template                         ${CERT_ROOT}/${CERT_ROOT}.cfg                       \
+           --load-privkey                     ${CERT_ROOT}/${CERT_ROOT}.key                       \
+           --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crt
 
-  (cd ${CERT_ROOT}; md5sum *)         > ${CERT_ROOT}/${CERT_ROOT}.md5
+  (cd ${CERT_ROOT}; md5sum *)               > ${CERT_ROOT}/${CERT_ROOT}.md5
 
-  certtool --generate-crl                                               \
-           --template                   ${CERT_ROOT}/${CERT_ROOT}.cfg   \
-           --load-ca-privkey            ${CERT_ROOT}/${CERT_ROOT}.key   \
-           --load-ca-certificate        ${CERT_ROOT}/${CERT_ROOT}.crt   \
-           --outfile                    ${CERT_ROOT}/${CERT_ROOT}.crl
+  certtool --generate-crl                                                                         \
+           --template                         ${CERT_ROOT}/${CERT_ROOT}.cfg                       \
+           --load-ca-privkey                  ${CERT_ROOT}/${CERT_ROOT}.key                       \
+           --load-ca-certificate              ${CERT_ROOT}/${CERT_ROOT}.crt                       \
+           --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crl
 
 fi
 
-if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                              \
-   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                   \
+if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                                    \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
-  certtool --generate-crl                                                                   \
-           --load-crl                   ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
-           --template                   ${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg           \
-           --load-ca-privkey            ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
-           --load-ca-certificate        ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt           \
-           --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
-           --outfile                    ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx
+  certtool --generate-crl                                                                         \
+           --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
+           --template                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg           \
+           --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
+           --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt           \
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --outfile                          ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx
 
   if [ $? -eq 0 ]; then
     mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
@@ -215,79 +215,79 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
 
 fi
 
-if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                             \
-   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                    \
-   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                    \
+if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
-  certtool --generate-privkey           ${LEAF_KEY_PARAMS}                                  \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key
+  certtool --generate-privkey                 ${LEAF_KEY_PARAMS}                                  \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key
 
-  template ${MODE}                    > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
-  certtool --generate-certificate                                                           \
-           --template                   ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
-           --load-privkey               ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
-           --load-ca-privkey            ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
-           --load-ca-certificate        ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
+  template ${MODE}                          > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  certtool --generate-certificate                                                                 \
+           --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
+           --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
+           --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                 \
-  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
+  [ "${MODE}" = "leaf" ] &&                                                                       \
+  fullchain ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                 \
-  certtool --to-p12 --outder                                                                \
-           --p12-name                   ${CERT_LEAF}                                        \
-           --load-privkey               ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
-           --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
-           --password         $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt)
+  [ "${MODE}" = "leaf" ] &&                                                                       \
+  certtool --to-p12 --outder                                                                      \
+           --p12-name                         ${CERT_LEAF}                                        \
+           --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
+           --password               $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt)
 
-  [ "${MODE}" = "leaf" ] &&                                                                 \
-  tar --create --file - --owner=0 --group=0                                                 \
-      --directory                       ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
-                                                                  ${CERT_LEAF}.crt          \
-                                                                  ${CERT_LEAF}.chain.crt    \
-        | gpg --quiet --symmetric --armor                                                   \
-              --compress-algo Uncompressed --digest-algo SHA256 --cipher-algo AES128        \
-              --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt    \
-                                      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.asc
+  [ "${MODE}" = "leaf" ] &&                                                                       \
+  tar --create --file - --owner=0 --group=0                                                       \
+      --directory                             ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
+                                                                        ${CERT_LEAF}.crt          \
+                                                                        ${CERT_LEAF}.chain.crt    \
+              | gpg --quiet --symmetric --armor                                                   \
+                    --compress-algo Uncompressed --digest-algo SHA256 --cipher-algo AES128        \
+                    --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt    \
+                                            > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.asc
 
-  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *) > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
+  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
-  [ "${MODE}" = "inter" ] &&                                                                \
-  certtool --generate-crl                                                                   \
-           --template                   ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
-           --load-ca-privkey            ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
-           --load-ca-certificate        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
+  [ "${MODE}" = "inter" ] &&                                                                      \
+  certtool --generate-crl                                                                         \
+           --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
+           --load-ca-privkey                  ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
+           --load-ca-certificate              ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
 
 fi
 
-if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                             \
-   [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                   \
+if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+   [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
-  template sign                       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  template sign                             > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
-  certtool --generate-certificate       ${LEAF_KEY_PARAMS}                                  \
-           --template                   ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
-           --load-request               ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr          \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
-           --load-ca-privkey            ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
-           --load-ca-certificate        ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
+  certtool --generate-certificate             ${LEAF_KEY_PARAMS}                                  \
+           --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
+           --load-request                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr          \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
+           --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                 \
-  fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
+  [ "${MODE}" = "leaf" ] &&                                                                       \
+  fullchain ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                 \
-  certtool --to-p12 --outder                                                                \
-           --p12-name                   ${CERT_LEAF}                                        \
-           --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
-           --password          password # Windows compliance
+  [ "${MODE}" = "leaf" ] &&                                                                       \
+  certtool --to-p12 --outder                                                                      \
+           --p12-name                         ${CERT_LEAF}                                        \
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
+           --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
+           --password                password # Windows compliance
 
-  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *) > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
+  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
 fi
