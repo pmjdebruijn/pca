@@ -186,6 +186,8 @@ if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                         \
            --load-privkey               ${CERT_ROOT}/${CERT_ROOT}.key   \
            --outfile                    ${CERT_ROOT}/${CERT_ROOT}.crt
 
+  (cd ${CERT_ROOT}; md5sum *)         > ${CERT_ROOT}/${CERT_ROOT}.md5
+
   certtool --generate-crl                                               \
            --template                   ${CERT_ROOT}/${CERT_ROOT}.cfg   \
            --load-ca-privkey            ${CERT_ROOT}/${CERT_ROOT}.key   \
@@ -230,13 +232,6 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-privkey            ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
            --load-ca-certificate        ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" = "inter" ] &&                                                                \
-  certtool --generate-crl                                                                   \
-           --template                   ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
-           --load-ca-privkey            ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
-           --load-ca-certificate        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
-           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
-
   [ "${MODE}" = "leaf" ] &&                                                                 \
   fullchain ${CERT_ROOT}/${CERT_LEAF} > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt
 
@@ -257,6 +252,16 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
               --compress-algo Uncompressed --digest-algo SHA256 --cipher-algo AES128        \
               --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.txt    \
                                       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.asc
+
+  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *) > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
+
+  [ "${MODE}" = "inter" ] &&                                                                \
+  certtool --generate-crl                                                                   \
+           --template                   ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
+           --load-ca-privkey            ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
+           --load-ca-certificate        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
+
 
 fi
 
@@ -282,5 +287,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-certificate           ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.crt    \
            --outfile                    ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.chain.pfx    \
            --password          password # Windows compliance
+
+  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *) > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
 fi
