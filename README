@@ -56,10 +56,6 @@ Revoke a certificate:
 
 $ pca -r anvil/hammer example.org
 
-Generate a CRL bundle (for Apache's SSLCARevocationFile):
-
-$ cat $(find anvil -name "*.crl" -type f | sort) > /etc/apache/ssl/anvil.bundle.crl
-
 Show certification authority hierarchical structure:
 
 $ find -type d anvil
