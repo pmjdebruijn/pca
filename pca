@@ -112,7 +112,7 @@ genpass ()
 
 crlbundle ()
 {
-  cat $(find ${CA_ROOT} -name "*.crl" -type f | sort) > ${CA_ROOT}/${CA_ROOT}.bundle.crl
+  cat $(find $1 -name "*.crl" -type f | sort)
 }
 
 
@@ -219,7 +219,7 @@ if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-certificate              ${CERT_ROOT}/${CERT_ROOT}.crt                       \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crl
 
-  crlbundle
+  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
   gitcommit "new root"                        ${CERT_ROOT}
 
@@ -242,7 +242,7 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
     mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
   fi
 
-  crlbundle
+  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
   gitcommit "revoke"                          ${CERT_ROOT}/${CERT_LEAF}
 
@@ -296,7 +296,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
   [ "${MODE}" = "inter" ] &&                                                                      \
-  crlbundle
+  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
   gitcommit "new $MODE"                       ${CERT_ROOT}/${CERT_LEAF}
 
