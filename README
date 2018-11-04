@@ -3,10 +3,10 @@ Private Certification Authority
 
 Important characteristics
 
- * Written as a pure Bourne shell script (trivially adaptable)
+ * Written as a dash compatible Bourne shell script (trivially adaptable)
  * Only has limited error handling
  * Has not been exhaustively tested
- * Has not been audited by a third party
+ * Has not been audited by a third party (but should be fairly easy to audit)
  * Depends on GNU TLS' certtool
  * Only handles basic revocation through a CRL (no OCSP)
 
@@ -14,7 +14,9 @@ Critical considerations for use
 
  * You need to verify the correct operation of the script on your particular system
  * You need to trust GNU TLS' key generation
- * You need to trust your systems entropy (consider using a hardware entropy source like a ChaosKey)
+ * You need to trust your systems entropy
+   Consider looking into using a hardware entropy source like a ChaosKey (from Altus Metrum)
+   Particularly for generating the authorities themselves (as these are long lived private keys)
 
 
 Basic Usage
@@ -22,7 +24,7 @@ Basic Usage
 
 Download and install:
 
-$ sudo apt-get install gnutls-bin
+$ sudo apt-get install gnutls-bin gnupg git
 $ sudo wget https://raw.githubusercontent.com/pmjdebruijn/pca/master/pca -o /usr/local/bin/pca
 $ sudo chmod 755 /usr/local/bin/pca
 
