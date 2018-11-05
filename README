@@ -54,6 +54,12 @@ $ pca -n www.example.org anvil/hammer www.example.org_1
 $ pca -n www.example.org anvil/hammer www.example.org_2
 $ pca -n www.example.org anvil/hammer www.example.org_3
 
+Generate (remote) certificate signing request to sign:
+
+$ openssl req -nodes -newkey rsa:2048 -sha256 -keyout example-org.key -out example-org.csr -subj "/C=US/ST=California/L=Sacramento/O=ACME Corporation/CN=example.org"
+$ mkdir -p anvil/hammer/example-org; cp example-org.csr anvil/hammer/example-org
+$ pca anvil/hammer example-org
+
 Revoke a certificate:
 
 $ pca -r anvil/hammer example.org
