@@ -52,12 +52,14 @@ esac
 
 MODE=leaf
 
-while getopts ':n:d:y:o:c:irf' OPT "$@"; do
+while getopts ':n:d:y:o:l:s:c:irf' OPT "$@"; do
   case ${OPT} in
     n) NAME=${OPTARG} ;;
     d) DNS_NAMES=${OPTARG} ;;
     y) YEAR=${OPTARG} ;;
     o) ORGANIZATION=${OPTARG} ;;
+    l) LOCALITY=${OPTARG} ;;
+    s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
     i) MODE=inter && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS} ;;
     r) MODE=revoke ;;
@@ -68,6 +70,8 @@ while getopts ':n:d:y:o:c:irf' OPT "$@"; do
       echo "           -d  additional domain names (dns san)"                        2>&1
       echo "           -y  year (valid up to and including)"                         2>&1
       echo "           -o  organisation name"                                        2>&1
+      echo "           -l  locality (city)"                                          2>&1
+      echo "           -s  state (province)"                                         2>&1
       echo "           -c  country code (iso)"                                       2>&1
       echo "           -i  generate an intermediate certificate authority"           2>&1
       echo "           -r  revoke certificate"                                       2>&1
@@ -143,6 +147,8 @@ template ()
     root)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
+      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
+      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
       echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Root Certification Authority $(date +%Y)}'"
       echo "#path_len = 1"
@@ -154,6 +160,8 @@ template ()
     inter)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
+      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
+      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
       echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${CERT_LEAF_NAME} $ALGO Intermediate Certification Authority $(date +%Y)}'"
       echo "#path_len = 0"
@@ -164,6 +172,8 @@ template ()
     leaf)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
+      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
+      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
       echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"    # Subject Alternative Name
