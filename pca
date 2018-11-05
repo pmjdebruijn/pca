@@ -106,11 +106,18 @@ gitcommit ()
 
 
 
-
 genpass ()
 {
   echo $(head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01iIl5S8B' | tail -c 24) | tee $1
   [ -f $1 ] && chmod 600 $1
+}
+
+
+
+
+md5sums ()
+{
+  (cd $1; md5sum *[^md5])
 }
 
 
@@ -225,7 +232,7 @@ if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-privkey                     ${CERT_ROOT}/${CERT_ROOT}.key                       \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crt
 
-  (cd ${CERT_ROOT}; md5sum *)               > ${CERT_ROOT}/${CERT_ROOT}.md5
+  md5sums ${CERT_ROOT}                      > ${CERT_ROOT}/${CERT_ROOT}.md5
 
   certtool --generate-crl                                                                         \
            --template                         ${CERT_ROOT}/${CERT_ROOT}.cfg                       \
@@ -300,7 +307,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
                     --batch --passphrase-file ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.txt   \
                                             > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.asc
 
-  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
+  md5sums ${CERT_ROOT}/${CERT_LEAF}         > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
   [ "${MODE}" = "inter" ] &&                                                                      \
   certtool --generate-crl                                                                         \
@@ -344,7 +351,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.pfx   \
            --password                password # Windows compliance
 
-  (cd ${CERT_ROOT}/${CERT_LEAF}; md5sum *)  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
+  md5sums ${CERT_ROOT}/${CERT_LEAF}         > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
   gitcommit "sign"                            ${CERT_ROOT}/${CERT_LEAF}
 
