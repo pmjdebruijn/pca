@@ -125,7 +125,7 @@ md5sums ()
 
 crlbundle ()
 {
-  cat $(find $1 -name "*.crl" -type f | sort)
+  cat $(find $1 -name "*.crl" -not -name "*.bundle.crl" -type f | sort)
 }
 
 
