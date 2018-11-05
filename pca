@@ -147,6 +147,7 @@ template ()
     root)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
+      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
       echo "country = ${COUNTRY}"
@@ -160,6 +161,7 @@ template ()
     inter)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
+      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
       echo "country = ${COUNTRY}"
