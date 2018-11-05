@@ -12,6 +12,7 @@ Important characteristics
 
 Critical considerations for use
 
+ * Consider operating an authority from a LUKS encrypted partition
  * You need to verify the correct operation of the script on your particular system
  * You need to trust GNU TLS' key generation
  * You need to trust your systems entropy
