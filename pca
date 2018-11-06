@@ -122,7 +122,7 @@ genpass ()
 
 md5sums ()
 {
-  (cd $1; md5sum *[^md5])
+  (cd $1; md5sum *[!md5])
 }
 
 
