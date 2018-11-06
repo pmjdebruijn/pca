@@ -258,7 +258,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
 
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
-  gitcommit "new root"                        ${CERT_ROOT}
+  gitcommit "${MODE}"                         ${CERT_ROOT}
 
 fi
 
@@ -314,7 +314,7 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
   [ "${MODE}" = "inter" ] &&                                                                      \
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
-  gitcommit "new $MODE"                       ${CERT_ROOT}/${CERT_LEAF}
+  gitcommit "$MODE"                           ${CERT_ROOT}/${CERT_LEAF}
 
 fi
 
@@ -348,7 +348,7 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
 
   md5sums ${CERT_ROOT}/${CERT_LEAF}         > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
-  gitcommit "sign"                            ${CERT_ROOT}/${CERT_LEAF}
+  gitcommit "${MODE}"                         ${CERT_ROOT}/${CERT_LEAF}
 
 fi
 
@@ -371,6 +371,6 @@ if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                  
 
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
-  gitcommit "revoke"                          ${CERT_ROOT}/${CERT_LEAF}
+  gitcommit "${MODE}"                         ${CERT_ROOT}/${CERT_LEAF}
 
 fi
