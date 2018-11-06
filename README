@@ -31,39 +31,39 @@ $ sudo chmod 755 /usr/local/bin/pca
 
 Create a new root certification authority:
 
-$ pca -c US -o 'ACME Corporation' Anvil
+$ pca -c US -o 'ACME Corporation' root Anvil
 
 Create a new (optional) intermediate certification authority (under our previously created root):
 
-$ pca -c US -o 'ACME Corporation' -i Anvil Hammer
+$ pca -c US -o 'ACME Corporation' inter Anvil Hammer
 
 Create a simple server certificate:
 
-$ pca -c US -o 'Example, Inc.' anvil/hammer example.org
+$ pca -c US -o 'Example, Inc.' server anvil/hammer example.org
 
 Create a server certificate including an additional subdomain:
 
-$ pca -c US -o 'Example, Inc.' -d www.example.org anvil/hammer example.org
+$ pca -c US -o 'Example, Inc.' -d www.example.org server anvil/hammer example.org
 
 Create a server certificate including multiple additional subdomains:
 
-$ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' anvil/hammer example.org
+$ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' server anvil/hammer example.org
 
 Create multiple server certificates with the same domain name:
 
-$ pca -n www.example.org anvil/hammer www.example.org_1
-$ pca -n www.example.org anvil/hammer www.example.org_2
-$ pca -n www.example.org anvil/hammer www.example.org_3
+$ pca -n www.example.org anvil/hammer server www.example.org_1
+$ pca -n www.example.org anvil/hammer server www.example.org_2
+$ pca -n www.example.org anvil/hammer server www.example.org_3
 
 Generate (remote) certificate signing request to sign:
 
 $ openssl req -nodes -newkey rsa:2048 -sha256 -keyout example-org.key -out example-org.csr -subj "/C=US/ST=California/L=Sacramento/O=ACME Corporation/CN=example.org"
 $ mkdir -p anvil/hammer/example-org; cp example-org.csr anvil/hammer/example-org
-$ pca anvil/hammer example-org
+$ pca sign anvil/hammer example-org
 
 Revoke a certificate:
 
-$ pca -r anvil/hammer example.org
+$ pca revoke anvil/hammer example.org
 
 Show certification authority hierarchical structure:
 
