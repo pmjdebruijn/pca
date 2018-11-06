@@ -50,32 +50,28 @@ esac
 
 
 
-MODE=leaf
-
-while getopts ':n:d:y:o:l:s:c:irf' OPT "$@"; do
+while getopts ':n:d:e:y:o:l:s:c:f' OPT "$@"; do
   case ${OPT} in
     n) NAME=${OPTARG} ;;
     d) DNS_NAMES=${OPTARG} ;;
+    e) EMAIL_NAMES=${OPTARG} ;;
     y) YEAR=${OPTARG} ;;
     o) ORGANIZATION=${OPTARG} ;;
     l) LOCALITY=${OPTARG} ;;
     s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
-    i) MODE=inter && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS} ;;
-    r) MODE=revoke ;;
     f) FORCE=IAMSURE ;;
     *)
-      echo "Usage: ${BASENAME} [OPTION] CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]"    2>&1
-      echo "           -n  primary domain name (common name)"                        2>&1
-      echo "           -d  additional domain names (dns san)"                        2>&1
-      echo "           -y  year (valid up to and including)"                         2>&1
-      echo "           -o  organisation name"                                        2>&1
-      echo "           -l  locality (city)"                                          2>&1
-      echo "           -s  state (province)"                                         2>&1
-      echo "           -c  country code (iso)"                                       2>&1
-      echo "           -i  generate an intermediate certificate authority"           2>&1
-      echo "           -r  revoke certificate"                                       2>&1
-      echo "           -f  force certificate signing request"                        2>&1
+      echo "Usage: ${BASENAME} [OPTION] MODE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]" 2>&1
+      echo "           -n  primary domain name (common name)"                          2>&1
+      echo "           -d  additional domain names (dns san)"                          2>&1
+      echo "           -e  email (san)"                                                2>&1
+      echo "           -y  year (valid up to and including)"                           2>&1
+      echo "           -o  organisation name"                                          2>&1
+      echo "           -l  locality (city)"                                            2>&1
+      echo "           -s  state (province)"                                           2>&1
+      echo "           -c  country code (iso)"                                         2>&1
+      echo "           -f  force certificate signing request"                          2>&1
       exit 1
       ;;
   esac
@@ -83,12 +79,13 @@ done
 
 shift $(( ${OPTIND} - 1 ))
 
-CA_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | cut -d '/' -f 1)
-CERT_ROOT=$(echo $1 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
-CERT_LEAF=$(echo $2 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '.' '-' | tr -cd '0-9a-z-')
+CA_ROOT=$(echo $2 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | cut -d '/' -f 1)
+CERT_ROOT=$(echo $2 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
+CERT_LEAF=$(echo $3 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '@.' '-' | tr -cd '0-9a-z-')
 
-CERT_ROOT_NAME=$1
-CERT_LEAF_NAME=$2
+MODE=$1
+CERT_ROOT_NAME=$2
+CERT_LEAF_NAME=$3
 
 
 
@@ -178,7 +175,7 @@ template ()
       echo "cert_signing_key"
       echo "crl_signing_key"
       ;;
-    leaf)
+    server)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
@@ -192,6 +189,25 @@ template ()
       echo "signing_key"
       echo "encryption_key"
       echo "tls_www_server"
+      echo "tls_www_client"
+      ;;
+    email)
+      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
+      echo "organization = '${ORGANIZATION}'"
+      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
+      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
+      echo "country = ${COUNTRY}"
+      echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
+      echo "email = '${NAME:-${CERT_LEAF_NAME}}'"       # Subject Alternative Name
+      if [ "${EMAIL_NAMES}"  != "" ]; then
+        for EMAIL_NAME in ${EMAIL_NAMES}; do
+          echo "email = '${EMAIL_NAME}'"                # Subject Alternative Name
+        done
+      fi
+      echo "email_protection_key"
+      echo "data_encipherment"
+      echo "signing_key"
+      echo "encryption_key"
       echo "tls_www_client"
       ;;
     sign)
@@ -219,7 +235,7 @@ template ()
 
 
 
-if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [ ! -d ${CERT_ROOT} ]; then
 
   mkdir -p ${CERT_ROOT}
@@ -246,7 +262,7 @@ if [ $# -eq 1 ] && [ "${MODE}" != "revoke" ] &&                                 
 
 fi
 
-if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                                    \
+if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                                    \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
@@ -269,10 +285,12 @@ if [ $# -eq 2 ] && [ "${MODE}" = "revoke" ] &&                                  
 
 fi
 
-if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
+
+  [ "${MODE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
   certtool --generate-privkey                 ${LEAF_KEY_PARAMS}                                  \
@@ -286,10 +304,10 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
            --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                       \
+  [ "${MODE}" != "inter" ] &&                                                                     \
   crtbundle ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                       \
+  [ "${MODE}" != "inter" ] &&                                                                     \
   certtool --to-p12 --outder                                                                      \
            --p12-name                         ${CERT_LEAF}                                        \
            --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
@@ -297,7 +315,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.pfx   \
            --password               $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.txt)
 
-  [ "${MODE}" = "leaf" ] &&                                                                       \
+  [ "${MODE}" != "inter" ] &&                                                                     \
   tar      --create --owner=0 --group=0                                                           \
            --file - --directory               ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
                                                                         ${CERT_LEAF}.crt          \
@@ -323,7 +341,7 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
 
 fi
 
-if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
@@ -341,10 +359,10 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
            --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
            --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                       \
+  [ "${MODE}" != "inter" ] &&                                                                     \
   crtbundle ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt
 
-  [ "${MODE}" = "leaf" ] &&                                                                       \
+  [ "${MODE}" != "inter" ] &&                                                                     \
   certtool --to-p12 --outder                                                                      \
            --p12-name                         ${CERT_LEAF}                                        \
            --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt   \
