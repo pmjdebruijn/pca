@@ -338,7 +338,7 @@ if [ $# -eq 3 ] && [ "${MODE}" = "sign" ] &&                                    
 
   certtool --crq-info --infile                ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr
 
-  [ "${FORCE}" != "IAMSURE" ] && read -p "Do you want to sign the above certificate signing request? (Type IAMSURE to continue): " FORCE
+  [ "${FORCE}" != "IAMSURE" ] && echo "Do you want to sign the above certificate signing request (Type IAMSURE to continue)?" && read FORCE
   [ "${FORCE}" != "IAMSURE" ] && echo "Aborting" 1>&2 && exit 1
 
   template sign                             > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
