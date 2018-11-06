@@ -90,6 +90,14 @@ CERT_LEAF_NAME=$3
 
 
 
+gitcheck ()
+{
+  [ -n "$(git -C ${CA_ROOT} status --porcelain)" ] && echo "${BASENAME}: Your root authority has uncommitted changes, use 'git -C ${CA_ROOT} status' to check" 2>&1 && exit 1
+}
+
+
+
+
 gitcommit ()
 {
   git -C ${CA_ROOT} init --quiet
@@ -238,6 +246,8 @@ template ()
 if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [ ! -d ${CERT_ROOT} ]; then
 
+  gitcheck
+
   mkdir -p ${CERT_ROOT}
   certtool --generate-privkey                 ${ROOT_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.key
@@ -266,6 +276,8 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
+
+  gitcheck
 
   [ "${MODE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
 
@@ -322,6 +334,8 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
+  gitcheck
+
   certtool --crq-info --infile                ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr
 
   [ "${FORCE}" != "IAMSURE" ] && read -p "Do you want to sign the above certificate signing request? (Type IAMSURE to continue): " FORCE
@@ -355,6 +369,8 @@ fi
 if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                                    \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
+
+  gitcheck
 
   certtool --generate-crl                                                                         \
            --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
