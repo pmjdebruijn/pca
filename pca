@@ -262,29 +262,6 @@ if [ $# -eq 2 ] && [ "${MODE}" != "revoke" ] &&                                 
 
 fi
 
-if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                                    \
-   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
-   [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
-
-  certtool --generate-crl                                                                         \
-           --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
-           --template                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg           \
-           --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
-           --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt           \
-           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
-           --outfile                          ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx
-
-  if [ $? -eq 0 ]; then
-    mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
-    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
-  fi
-
-  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
-
-  gitcommit "revoke"                          ${CERT_ROOT}/${CERT_LEAF}
-
-fi
-
 if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
@@ -372,5 +349,28 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
   md5sums ${CERT_ROOT}/${CERT_LEAF}         > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
   gitcommit "sign"                            ${CERT_ROOT}/${CERT_LEAF}
+
+fi
+
+if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                                    \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
+   [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
+
+  certtool --generate-crl                                                                         \
+           --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
+           --template                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg           \
+           --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
+           --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt           \
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --outfile                          ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx
+
+  if [ $? -eq 0 ]; then
+    mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
+    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
+  fi
+
+  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
+
+  gitcommit "revoke"                          ${CERT_ROOT}/${CERT_LEAF}
 
 fi
