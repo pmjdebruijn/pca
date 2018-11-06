@@ -330,7 +330,7 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
 
 fi
 
-if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+if [ $# -eq 3 ] && [ "${MODE}" = "sign" ] &&                                                      \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
