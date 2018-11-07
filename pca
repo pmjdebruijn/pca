@@ -246,8 +246,6 @@ template ()
 if [ $# -eq 2 ] && [ "${MODE}" = "root" ] &&                                                      \
    [ ! -d ${CERT_ROOT} ]; then
 
-  gitcheck
-
   mkdir -p ${CERT_ROOT}
   certtool --generate-privkey                 ${ROOT_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.key
