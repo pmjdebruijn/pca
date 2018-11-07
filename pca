@@ -206,8 +206,9 @@ template ()
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
       echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
-      echo "email = '${NAME:-${CERT_LEAF_NAME}}'"       # Subject Alternative Name
-      if [ "${EMAIL_NAMES}"  != "" ]; then
+      if [ "${EMAIL_NAMES}"  = "" ]; then
+        echo "email = '${CERT_LEAF_NAME}'"              # Subject Alternative Name
+      else
         for EMAIL_NAME in ${EMAIL_NAMES}; do
           echo "email = '${EMAIL_NAME}'"                # Subject Alternative Name
         done
