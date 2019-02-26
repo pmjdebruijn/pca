@@ -45,8 +45,6 @@ esac
 
 [ ! -x "$(which gpg)" ] && echo "${BASENAME} needs gpg (gnupg) anywhere in ${PATH}" 1>&2 && exit 1
 
-[ ! -x "$(which git)" ] && echo "${BASENAME} needs git (git) anywhere in ${PATH}" 1>&2 && exit 1
-
 
 
 
@@ -86,27 +84,6 @@ CERT_LEAF=$(echo $3 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '@.' '-' | tr -
 MODE=$1
 CERT_ROOT_NAME=$2
 CERT_LEAF_NAME=$3
-
-
-
-
-gitcheck ()
-{
-  [ -n "$(git -C ${CA_ROOT} status --porcelain)" ] && echo "${BASENAME}: Your root authority has uncommitted changes, use 'git -C ${CA_ROOT} status' to check" 2>&1 && exit 1
-}
-
-
-
-
-gitcommit ()
-{
-  git -C ${CA_ROOT} init --quiet
-  git -C ${CA_ROOT} add --all
-  git -C ${CA_ROOT} commit --quiet --all --message "$1: $2" --message "$(git -C ${CA_ROOT} status --porcelain)" \
-      --author "$(getent passwd ${SUDO_USER:-${USER}} | cut -d ':' -f 5 | cut -d ',' -f 1) <${SUDO_USER:-${USER}}@$(hostname -f)>"
-
-  chmod 700 ${CA_ROOT}/.git
-}
 
 
 
@@ -267,16 +244,12 @@ if [ $# -eq 2 ] && [ "${MODE}" = "root" ] &&                                    
 
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
-  gitcommit "${MODE}"                         ${CERT_ROOT}
-
 fi
 
 if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                                   \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
-
-  gitcheck
 
   [ "${MODE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
 
@@ -325,8 +298,6 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
   [ "${MODE}" = "inter" ] &&                                                                      \
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
-  gitcommit "$MODE"                           ${CERT_ROOT}/${CERT_LEAF}
-
 fi
 
 if [ $# -eq 3 ] && [ "${MODE}" = "sign" ] &&                                                      \
@@ -359,15 +330,11 @@ if [ $# -eq 3 ] && [ "${MODE}" = "sign" ] &&                                    
 
   md5sums ${CERT_ROOT}/${CERT_LEAF}         > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
-  gitcommit "${MODE}"                         ${CERT_ROOT}/${CERT_LEAF}
-
 fi
 
 if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                                    \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
-
-  gitcheck
 
   certtool --generate-crl                                                                         \
            --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
@@ -383,7 +350,5 @@ if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                  
   fi
 
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
-
-  gitcommit "${MODE}"                         ${CERT_ROOT}/${CERT_LEAF}
 
 fi
