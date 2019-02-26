@@ -221,7 +221,8 @@ template ()
 
 
 
-if [ $# -eq 2 ] && [ "${MODE}" = "root" ] &&                                                      \
+if [ $# -eq 2 ] &&                                                                                \
+   [ "${MODE}" = "root" ] &&                                                                      \
    [ ! -d ${CERT_ROOT} ]; then
 
   mkdir -p ${CERT_ROOT}
@@ -246,7 +247,9 @@ if [ $# -eq 2 ] && [ "${MODE}" = "root" ] &&                                    
 
 fi
 
-if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                                   \
+if [ $# -eq 3 ] &&                                                                                \
+   [ "${MODE}" != "sign" ] &&                                                                     \
+   [ "${MODE}" != "revoke" ] &&                                                                   \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
@@ -300,7 +303,8 @@ if [ $# -eq 3 ] && [ "${MODE}" != "revoke" ] &&                                 
 
 fi
 
-if [ $# -eq 3 ] && [ "${MODE}" = "sign" ] &&                                                      \
+if [ $# -eq 3 ] &&                                                                                \
+   [ "${MODE}" = "sign" ] &&                                                                      \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
@@ -332,7 +336,8 @@ if [ $# -eq 3 ] && [ "${MODE}" = "sign" ] &&                                    
 
 fi
 
-if [ $# -eq 3 ] && [ "${MODE}" = "revoke" ] &&                                                    \
+if [ $# -eq 3 ] &&                                                                                \
+   [ "${MODE}" = "revoke" ] &&                                                                    \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
