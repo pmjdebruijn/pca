@@ -160,7 +160,7 @@ template ()
       echo "cert_signing_key"
       echo "crl_signing_key"
       ;;
-    server)
+    server|client)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
       echo "organization = '${ORGANIZATION}'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
@@ -173,7 +173,7 @@ template ()
       done
       echo "signing_key"
       echo "encryption_key"
-      echo "tls_www_server"
+      [ "$1" = "server" ] && echo "tls_www_server"
       echo "tls_www_client"
       ;;
     email)
