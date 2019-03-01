@@ -21,35 +21,15 @@ BASENAME=$(basename --suffix '.sh' $0)
 [ -f ~/.${BASENAME}.conf ] && . ~/.${BASENAME}.conf && echo "Configuration ~/.${BASENAME}.conf loaded..."
 [ -f ./${BASENAME}.conf ] && . ./${BASENAME}.conf && echo "Configuration ./${BASENAME}.conf loaded..."
 
-
-
-
-case ${ALGO} in
-  RSA)
-    ROOT_KEY_PARAMS='--rsa --bits 4096 --hash sha384'
-    LEAF_KEY_PARAMS='--rsa --bits 2048 --hash sha256'
-    ;;
-  ECDSA)
-    ROOT_KEY_PARAMS='--ecdsa --curve secp384r1 --hash sha384'    # estimated sec equiv to RSA7680
-    LEAF_KEY_PARAMS='--ecdsa --curve secp256r1 --hash sha256'    # estimated sec equiv to RSA3072
-    ;;
-  *)
-    echo "${BASENAME}: invalid ALGO: ${ALGO}" 1>&2 && exit 1
-    ;;
-esac
-
-
-
-
 [ ! -x "$(which certtool)" ] && echo "${BASENAME} needs certtool (gnutls-bin) anywhere in ${PATH}" 1>&2 && exit 1
-
 [ ! -x "$(which gpg)" ] && echo "${BASENAME} needs gpg (gnupg) anywhere in ${PATH}" 1>&2 && exit 1
 
 
 
 
-while getopts ':n:d:e:y:o:l:s:c:f' OPT "$@"; do
+while getopts ':a:n:d:e:y:o:l:s:c:f' OPT "$@"; do
   case ${OPT} in
+    a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
     d) DNS_NAMES=${OPTARG} ;;
     e) EMAIL_NAMES=${OPTARG} ;;
@@ -61,6 +41,7 @@ while getopts ':n:d:e:y:o:l:s:c:f' OPT "$@"; do
     f) FORCE=IAMSURE ;;
     *)
       echo "Usage: ${BASENAME} [OPTION] MODE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]" 2>&1
+      echo "           -a  cryptographic algorithm (rsa, ecdsa)"                       2>&1
       echo "           -n  primary domain name (common name)"                          2>&1
       echo "           -d  additional domain names (dns san)"                          2>&1
       echo "           -e  email (san)"                                                2>&1
@@ -84,6 +65,20 @@ CERT_LEAF=$(echo $3 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '@.' '-' | tr -
 MODE=$1
 CERT_ROOT_NAME=$2
 CERT_LEAF_NAME=$3
+
+case ${ALGO} in
+  RSA)
+    ROOT_KEY_PARAMS='--rsa --bits 4096 --hash sha384'
+    LEAF_KEY_PARAMS='--rsa --bits 2048 --hash sha256'
+    ;;
+  ECDSA)
+    ROOT_KEY_PARAMS='--ecdsa --curve secp384r1 --hash sha384'    # estimated sec equiv to RSA7680
+    LEAF_KEY_PARAMS='--ecdsa --curve secp256r1 --hash sha256'    # estimated sec equiv to RSA3072
+    ;;
+  *)
+    echo "${BASENAME}: invalid ALGO: ${ALGO}" 1>&2 && exit 1
+    ;;
+esac
 
 
 
