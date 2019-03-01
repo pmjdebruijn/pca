@@ -7,7 +7,7 @@ DEFAULT_ROOT_YEARS=30
 DEFAULT_INTER_YEARS=15
 DEFAULT_LEAF_YEARS=2
 
-ALGO=RSA
+ALGO=ECDSA
 
 COUNTRY=US
 ORGANIZATION="ACME Corporation"
@@ -251,7 +251,7 @@ if [ $# -eq 3 ] &&                                                              
    [ "${MODE}" != "sign" ] &&                                                                     \
    [ "${MODE}" != "revoke" ] &&                                                                   \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
-   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl ] &&                                          \
+   [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
 
   [ "${MODE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
