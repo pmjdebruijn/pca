@@ -36,19 +36,19 @@ while getopts ':a:n:d:e:t:y:o:l:s:c:rf' OPT "$@"; do
     r) REQUEST=sign ;;
     f) FORCE=IAMSURE ;;
     *)
-      echo "Usage: ${BASENAME} [OPTION] MODE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]" 2>&1
-      echo "           -a  cryptographic algorithm (rsa, ecdsa)"                       2>&1
-      echo "           -n  primary domain name (common name)"                          2>&1
-      echo "           -d  additional domain names (dns san)"                          2>&1
-      echo "           -e  email (san)"                                                2>&1
-      echo "           -t  timezone"                                                   2>&1
-      echo "           -y  year (valid up to and including)"                           2>&1
-      echo "           -o  organisation name"                                          2>&1
-      echo "           -l  locality (city)"                                            2>&1
-      echo "           -s  state (province)"                                           2>&1
-      echo "           -c  country code (iso)"                                         2>&1
-      echo "           -r  sign request"                                               2>&1
-      echo "           -f  force certificate signing request"                          2>&1
+      echo "Usage: ${BASENAME} [OPTION] TEMPLATE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]" 2>&1
+      echo "           -a  cryptographic algorithm (rsa, ecdsa)"                           2>&1
+      echo "           -n  primary domain name (common name)"                              2>&1
+      echo "           -d  additional domain names (dns san)"                              2>&1
+      echo "           -e  email (san)"                                                    2>&1
+      echo "           -t  timezone"                                                       2>&1
+      echo "           -y  year (valid up to and including)"                               2>&1
+      echo "           -o  organisation name"                                              2>&1
+      echo "           -l  locality (city)"                                                2>&1
+      echo "           -s  state (province)"                                               2>&1
+      echo "           -c  country code (iso)"                                             2>&1
+      echo "           -r  sign request"                                                   2>&1
+      echo "           -f  force certificate signing request"                              2>&1
       exit 1
       ;;
   esac
@@ -60,7 +60,7 @@ CA_ROOT=$(echo $2 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | cut -d '/' -f 1)
 CERT_ROOT=$(echo $2 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
 CERT_LEAF=$(echo $3 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '@.' '-' | tr -cd '0-9a-z-')
 
-MODE=$1
+TEMPLATE=$1
 CERT_ROOT_NAME=$2
 CERT_LEAF_NAME=$3
 
@@ -204,7 +204,7 @@ template ()
 
 
 if [ $# -eq 2 ] &&                                                                                \
-   [ "${MODE}" = "root" ] &&                                                                      \
+   [ "${TEMPLATE}" = "root" ] &&                                                                  \
    [ ! -d ${CERT_ROOT} ]; then
 
   mkdir -p ${CERT_ROOT}
@@ -231,18 +231,18 @@ fi
 
 if [ $# -eq 3 ] &&                                                                                \
    [ "${REQUEST}" != "sign" ] &&                                                                  \
-   [ "${MODE}" != "revoke" ] &&                                                                   \
+   [ "${TEMPLATE}" != "revoke" ] &&                                                               \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
 
-  [ "${MODE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
+  [ "${TEMPLATE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
   certtool --generate-privkey                 ${LEAF_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key
 
-  template ${MODE}                          > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  template ${TEMPLATE}                      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
   certtool --generate-certificate                                                                 \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
            --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
@@ -250,10 +250,10 @@ if [ $# -eq 3 ] &&                                                              
            --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
            --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" != "inter" ] &&                                                                     \
+  [ "${TEMPLATE}" != "inter" ] &&                                                                 \
   crtbundle ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt
 
-  [ "${MODE}" != "inter" ] &&                                                                     \
+  [ "${TEMPLATE}" != "inter" ] &&                                                                 \
   certtool --to-p12 --outder                                                                      \
            --p12-name                         ${CERT_LEAF}                                        \
            --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
@@ -261,7 +261,7 @@ if [ $# -eq 3 ] &&                                                              
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.pfx   \
            --password               $(genpass ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.txt)
 
-  [ "${MODE}" != "inter" ] &&                                                                     \
+  [ "${TEMPLATE}" != "inter" ] &&                                                                 \
   tar      --create --owner=0 --group=0                                                           \
            --file - --directory               ${CERT_ROOT}/${CERT_LEAF} ${CERT_LEAF}.key          \
                                                                         ${CERT_LEAF}.crt          \
@@ -273,14 +273,14 @@ if [ $# -eq 3 ] &&                                                              
 
   md5sums ${CERT_ROOT}/${CERT_LEAF}         > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.md5
 
-  [ "${MODE}" = "inter" ] &&                                                                      \
+  [ "${TEMPLATE}" = "inter" ] &&                                                                  \
   certtool --generate-crl                                                                         \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
            --load-ca-privkey                  ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
            --load-ca-certificate              ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
-  [ "${MODE}" = "inter" ] &&                                                                      \
+  [ "${TEMPLATE}" = "inter" ] &&                                                                  \
   crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
 
 fi
@@ -295,7 +295,7 @@ if [ $# -eq 3 ] &&                                                              
   [ "${FORCE}" != "IAMSURE" ] && echo "Do you want to sign the above certificate signing request (Type IAMSURE to continue)?" && read FORCE
   [ "${FORCE}" != "IAMSURE" ] && echo "Aborting" 1>&2 && exit 1
 
-  template ${MODE}                          > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  template ${TEMPLATE}                      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
   certtool --generate-certificate             ${LEAF_KEY_PARAMS}                                  \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
@@ -304,10 +304,10 @@ if [ $# -eq 3 ] &&                                                              
            --load-ca-privkey                  ${CERT_ROOT}/$(basename ${CERT_ROOT}).key           \
            --load-ca-certificate              ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt
 
-  [ "${MODE}" != "inter" ] &&                                                                     \
+  [ "${TEMPLATE}" != "inter" ] &&                                                                 \
   crtbundle ${CERT_ROOT}/${CERT_LEAF}       > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt
 
-  [ "${MODE}" != "inter" ] &&                                                                     \
+  [ "${TEMPLATE}" != "inter" ] &&                                                                 \
   certtool --to-p12 --outder                                                                      \
            --p12-name                         ${CERT_LEAF}                                        \
            --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.bundle.crt   \
@@ -319,7 +319,7 @@ if [ $# -eq 3 ] &&                                                              
 fi
 
 if [ $# -eq 3 ] &&                                                                                \
-   [ "${MODE}" = "revoke" ] &&                                                                    \
+   [ "${TEMPLATE}" = "revoke" ] &&                                                                \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
