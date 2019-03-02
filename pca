@@ -130,7 +130,7 @@ template ()
   [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
   [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
   [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-  [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
+  [ "${COUNTRY}" != "" ] && echo "country = ${COUNTRY}"
 
   case ${TEMPLATE} in
     root)
