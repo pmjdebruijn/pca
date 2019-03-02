@@ -9,9 +9,6 @@ DEFAULT_LEAF_YEARS=2
 
 ALGO=ECDSA
 
-COUNTRY=US
-ORGANIZATION="ACME Corporation"
-
 
 
 
@@ -126,11 +123,11 @@ template ()
   case $1 in
     root)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 UTC'"
-      echo "organization = '${ORGANIZATION}'"
-      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
+      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      echo "country = ${COUNTRY}"
+      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
+      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Root Certification Authority $(date +%Y)}'"
       echo "#path_len = 1"
       echo "ca"
@@ -140,11 +137,11 @@ template ()
     ;;
     inter)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 UTC'"
-      echo "organization = '${ORGANIZATION}'"
-      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
+      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      echo "country = ${COUNTRY}"
+      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
+      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${CERT_LEAF_NAME} $ALGO Intermediate Certification Authority $(date +%Y)}'"
       echo "#path_len = 0"
       echo "ca"
@@ -153,10 +150,10 @@ template ()
       ;;
     server|client)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
-      echo "organization = '${ORGANIZATION}'"
+      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      echo "country = ${COUNTRY}"
+      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"    # Subject Alternative Name
       for DNS_NAME in ${DNS_NAMES}; do
@@ -169,10 +166,10 @@ template ()
       ;;
     email)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 UTC'"
-      echo "organization = '${ORGANIZATION}'"
+      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
       [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
       [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      echo "country = ${COUNTRY}"
+      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       if [ "${EMAIL_NAMES}"  = "" ]; then
         echo "email = '${CERT_LEAF_NAME}'"              # Subject Alternative Name
