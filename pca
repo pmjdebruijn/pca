@@ -21,7 +21,7 @@ BASENAME=$(basename --suffix '.sh' $0)
 
 
 
-while getopts ':a:n:d:e:t:y:o:l:s:c:f' OPT "$@"; do
+while getopts ':a:n:d:e:t:y:o:l:s:c:rf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
@@ -33,6 +33,7 @@ while getopts ':a:n:d:e:t:y:o:l:s:c:f' OPT "$@"; do
     l) LOCALITY=${OPTARG} ;;
     s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
+    r) REQUEST=sign ;;
     f) FORCE=IAMSURE ;;
     *)
       echo "Usage: ${BASENAME} [OPTION] MODE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]" 2>&1
@@ -46,6 +47,7 @@ while getopts ':a:n:d:e:t:y:o:l:s:c:f' OPT "$@"; do
       echo "           -l  locality (city)"                                            2>&1
       echo "           -s  state (province)"                                           2>&1
       echo "           -c  country code (iso)"                                         2>&1
+      echo "           -r  sign request"                                               2>&1
       echo "           -f  force certificate signing request"                          2>&1
       exit 1
       ;;
@@ -187,17 +189,6 @@ template ()
       echo "encryption_key"
       echo "tls_www_client"
       ;;
-    sign)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
-      echo "honor_crq_ext = 2.5.29.17"                  # Subject Alternative Name
-      for DNS_NAME in ${DNS_NAMES}; do
-        echo "dns_name = '${DNS_NAME}'"                 # Subject Alternative Name
-      done
-      echo "signing_key"
-      echo "encryption_key"
-      echo "tls_www_server"
-      echo "tls_www_client"
-      ;;
     *)
       echo "${BASENAME}: internal $0 error, $1 template unknown!" 1>&2 && exit 1
       ;;
@@ -239,7 +230,7 @@ if [ $# -eq 2 ] &&                                                              
 fi
 
 if [ $# -eq 3 ] &&                                                                                \
-   [ "${MODE}" != "sign" ] &&                                                                     \
+   [ "${REQUEST}" != "sign" ] &&                                                                  \
    [ "${MODE}" != "revoke" ] &&                                                                   \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt ] &&                                          \
@@ -295,7 +286,7 @@ if [ $# -eq 3 ] &&                                                              
 fi
 
 if [ $# -eq 3 ] &&                                                                                \
-   [ "${MODE}" = "sign" ] &&                                                                      \
+   [ "${REQUEST}" = "sign" ] &&                                                                   \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr ] &&                                         \
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
@@ -304,7 +295,7 @@ if [ $# -eq 3 ] &&                                                              
   [ "${FORCE}" != "IAMSURE" ] && echo "Do you want to sign the above certificate signing request (Type IAMSURE to continue)?" && read FORCE
   [ "${FORCE}" != "IAMSURE" ] && echo "Aborting" 1>&2 && exit 1
 
-  template sign                             > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  template ${MODE}                          > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
   certtool --generate-certificate             ${LEAF_KEY_PARAMS}                                  \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
