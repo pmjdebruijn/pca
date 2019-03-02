@@ -17,10 +17,6 @@ ORGANIZATION="ACME Corporation"
 
 BASENAME=$(basename --suffix '.sh' $0)
 
-[ -f /etc/${BASENAME}.conf ] && . /etc/${BASENAME}.conf && echo "Configuration /etc/${BASENAME}.conf loaded..."
-[ -f ~/.${BASENAME}.conf ] && . ~/.${BASENAME}.conf && echo "Configuration ~/.${BASENAME}.conf loaded..."
-[ -f ./${BASENAME}.conf ] && . ./${BASENAME}.conf && echo "Configuration ./${BASENAME}.conf loaded..."
-
 [ ! -x "$(which certtool)" ] && echo "${BASENAME} needs certtool (gnutls-bin) anywhere in ${PATH}" 1>&2 && exit 1
 [ ! -x "$(which gpg)" ] && echo "${BASENAME} needs gpg (gnupg) anywhere in ${PATH}" 1>&2 && exit 1
 
