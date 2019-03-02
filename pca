@@ -125,13 +125,15 @@ crtbundle ()
 
 template ()
 {
+  echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
+
+  [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
+  [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
+  [ "${STATE}" != "" ] && echo "state = '${STATE}'"
+  [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
+
   case ${TEMPLATE} in
     root)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
-      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
-      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
-      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
       echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Root Certification Authority $(date +%Y)}'"
       echo "#path_len = 1"
@@ -141,11 +143,6 @@ template ()
       echo "crl_next_update 365"
     ;;
     inter)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
-      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
-      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
-      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
       echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${CERT_LEAF_NAME} $ALGO Intermediate Certification Authority $(date +%Y)}'"
       echo "#path_len = 0"
@@ -154,11 +151,6 @@ template ()
       echo "crl_signing_key"
       ;;
     server|client)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
-      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
-      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
-      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"    # Subject Alternative Name
       for DNS_NAME in ${DNS_NAMES}; do
@@ -170,11 +162,6 @@ template ()
       echo "tls_www_client"
       ;;
     email)
-      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
-      [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
-      [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
-      [ "${STATE}" != "" ] && echo "state = '${STATE}'"
-      [ "${COUNTYR}" != "" ] && echo "country = ${COUNTRY}"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       if [ "${EMAIL_NAMES}"  = "" ]; then
         echo "email = '${CERT_LEAF_NAME}'"              # Subject Alternative Name
