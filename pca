@@ -125,7 +125,7 @@ crtbundle ()
 
 template ()
 {
-  case $1 in
+  case ${TEMPLATE} in
     root)
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
@@ -166,7 +166,7 @@ template ()
       done
       echo "signing_key"
       echo "encryption_key"
-      [ "$1" = "server" ] && echo "tls_www_server"
+      [ "${TEMPLATE}" = "server" ] && echo "tls_www_server"
       echo "tls_www_client"
       ;;
     email)
@@ -211,7 +211,7 @@ if [ $# -eq 2 ] &&                                                              
   certtool --generate-privkey                 ${ROOT_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.key
 
-  template root                             > ${CERT_ROOT}/${CERT_ROOT}.cfg
+  template                                  > ${CERT_ROOT}/${CERT_ROOT}.cfg
   certtool --generate-self-signed                                                                 \
            --template                         ${CERT_ROOT}/${CERT_ROOT}.cfg                       \
            --load-privkey                     ${CERT_ROOT}/${CERT_ROOT}.key                       \
@@ -242,7 +242,7 @@ if [ $# -eq 3 ] &&                                                              
   certtool --generate-privkey                 ${LEAF_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key
 
-  template ${TEMPLATE}                      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  template                                  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
   certtool --generate-certificate                                                                 \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
            --load-privkey                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key          \
@@ -295,7 +295,7 @@ if [ $# -eq 3 ] &&                                                              
   [ "${FORCE}" != "IAMSURE" ] && echo "Do you want to sign the above certificate signing request (Type IAMSURE to continue)?" && read FORCE
   [ "${FORCE}" != "IAMSURE" ] && echo "Aborting" 1>&2 && exit 1
 
-  template ${TEMPLATE}                      > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
+  template                                  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
 
   certtool --generate-certificate             ${LEAF_KEY_PARAMS}                                  \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
