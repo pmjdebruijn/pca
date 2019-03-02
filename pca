@@ -21,13 +21,13 @@ BASENAME=$(basename --suffix '.sh' $0)
 
 
 
-while getopts ':a:n:d:e:t:y:o:l:s:c:rf' OPT "$@"; do
+while getopts ':a:n:d:e:z:y:o:l:s:c:rf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
     d) DNS_NAMES=${OPTARG} ;;
     e) EMAIL_NAMES=${OPTARG} ;;
-    t) TIMEZONE=${OPTARG} ;;
+    z) TIMEZONE=${OPTARG} ;;
     y) YEAR=${OPTARG} ;;
     o) ORGANIZATION=${OPTARG} ;;
     l) LOCALITY=${OPTARG} ;;
@@ -41,7 +41,7 @@ while getopts ':a:n:d:e:t:y:o:l:s:c:rf' OPT "$@"; do
       echo "           -n  primary domain name (common name)"                              2>&1
       echo "           -d  additional domain names (dns san)"                              2>&1
       echo "           -e  email (san)"                                                    2>&1
-      echo "           -t  timezone"                                                       2>&1
+      echo "           -z  timezone"                                                       2>&1
       echo "           -y  year (valid up to and including)"                               2>&1
       echo "           -o  organisation name"                                              2>&1
       echo "           -l  locality (city)"                                                2>&1
