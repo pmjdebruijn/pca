@@ -127,7 +127,7 @@ template ()
 {
   echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
 
-  [ "${ORGANISATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
+  [ "${ORGANIZATION}" != "" ] && echo "organization = '${ORGANIZATION}'"
   [ "${LOCALITY}" != "" ] && echo "locality = '${LOCALITY}'"
   [ "${STATE}" != "" ] && echo "state = '${STATE}'"
   [ "${COUNTRY}" != "" ] && echo "country = ${COUNTRY}"
