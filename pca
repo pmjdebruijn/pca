@@ -162,7 +162,8 @@ template ()
       echo "tls_www_client"
       ;;
     email)
-      echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
+      echo "cn = '${NAME:-Basic ID}'"
+      echo "pkcs9_email = '${CERT_LEAF_NAME}'"
       if [ "${EMAIL_NAMES}"  = "" ]; then
         echo "email = '${CERT_LEAF_NAME}'"              # Subject Alternative Name
       else
