@@ -186,6 +186,12 @@ template ()
       echo "key_purpose_oid 1.3.6.1.4.1.311.2.1.22"     # Microsoft Commercial Code Signing
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       ;;
+    timestamp)
+      echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
+      echo "signing_key"
+      echo "time_stamping_key"
+      echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
+      ;;
     *)
       echo "${BASENAME}: internal $0 error, $1 template unknown!" 1>&2 && exit 1
       ;;
