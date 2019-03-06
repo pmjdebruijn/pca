@@ -196,6 +196,8 @@ template ()
       echo "${BASENAME}: internal $0 error, $1 template unknown!" 1>&2 && exit 1
       ;;
   esac
+
+  [ "${REQUEST}" = "sign" ] && echo "honor_crq_ext = 2.5.29.17"    # Subject Alternative Name
 }
 
 
