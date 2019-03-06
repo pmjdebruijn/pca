@@ -152,9 +152,9 @@ template ()
       ;;
     server|client)
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
-      echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"    # Subject Alternative Name
+      echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"               # Subject Alternative Name
       for DNS_NAME in ${DNS_NAMES}; do
-        echo "dns_name = '${DNS_NAME}'"                 # Subject Alternative Name
+        echo "dns_name = '${DNS_NAME}'"                            # Subject Alternative Name
       done
       echo "signing_key"
       echo "encryption_key"
@@ -166,10 +166,10 @@ template ()
       echo "cn = '${NAME:-Basic ID}'"
       echo "pkcs9_email = '${CERT_LEAF_NAME}'"
       if [ "${EMAIL_NAMES}"  = "" ]; then
-        echo "email = '${CERT_LEAF_NAME}'"              # Subject Alternative Name
+        echo "email = '${CERT_LEAF_NAME}'"                         # Subject Alternative Name
       else
         for EMAIL_NAME in ${EMAIL_NAMES}; do
-          echo "email = '${EMAIL_NAME}'"                # Subject Alternative Name
+          echo "email = '${EMAIL_NAME}'"                           # Subject Alternative Name
         done
       fi
       echo "email_protection_key"
@@ -183,7 +183,7 @@ template ()
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "signing_key"
       echo "code_signing_key"
-      echo "key_purpose_oid 1.3.6.1.4.1.311.2.1.22"     # Microsoft Commercial Code Signing
+      echo "key_purpose_oid 1.3.6.1.4.1.311.2.1.22"                # Microsoft Commercial Code Signing
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       ;;
     timestamp)
