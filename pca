@@ -138,7 +138,6 @@ template ()
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
-      echo "crl_next_update 365"
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
     ;;
     inter)
