@@ -58,7 +58,7 @@ shift $(( ${OPTIND} - 1 ))
 
 CA_ROOT=$(echo $2 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/' | cut -d '/' -f 1)
 CERT_ROOT=$(echo $2 | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-/')
-CERT_LEAF=$(echo $3 | sed 's#^*#wildcard#g'| tr 'A-Z' 'a-z' | tr '@.' '-' | tr -cd '0-9a-z-')
+CERT_LEAF=$(echo $3 | sed 's#^*#wildcard#g' | sed 's#@#-at-#g' | tr '.' '-' | tr 'A-Z' 'a-z' | tr -cd '0-9a-z-')
 
 TEMPLATE=$1
 CERT_ROOT_NAME=$2
