@@ -36,19 +36,20 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:rf' OPT "$@"; do
     r) REQUEST=sign ;;
     f) FORCE=IAMSURE ;;
     *)
-      echo "Usage: ${BASENAME} [OPTION] TEMPLATE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]" 2>&1
-      echo "           -a  Cryptographic algorithm (RSA, ECDSA)"                           2>&1
-      echo "           -n  Override Common Name"                                           2>&1
-      echo "           -d  Additional domain names (DNS SubjectAltName)"                   2>&1
-      echo "           -e  Additional email addresses (email SubjectAltName)"              2>&1
-      echo "           -z  Timezone"                                                       2>&1
-      echo "           -y  Year (valid up to and including)"                               2>&1
-      echo "           -o  Organisation name"                                              2>&1
-      echo "           -l  Locality (City)"                                                2>&1
-      echo "           -s  State (or Province)"                                            2>&1
-      echo "           -c  Country code (ISO)"                                             2>&1
-      echo "           -r  Sign Certificate Signing Request"                               2>&1
-      echo "           -f  Force Certificate Signing Request"                              2>&1
+      echo "Usage: ${BASENAME} [OPTION] TEMPLATE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]"      2>&1
+      echo "           -a  Cryptographic algorithm (RSA ECDSA)"                                 2>&1
+      echo "           -n  Override Common Name"                                                2>&1
+      echo "           -d  Additional domain names (DNS SubjectAltName)"                        2>&1
+      echo "           -e  Additional email addresses (email SubjectAltName)"                   2>&1
+      echo "           -z  Timezone"                                                            2>&1
+      echo "           -y  Year (valid up to and including)"                                    2>&1
+      echo "           -o  Organisation name"                                                   2>&1
+      echo "           -l  Locality (City)"                                                     2>&1
+      echo "           -s  State (or Province)"                                                 2>&1
+      echo "           -c  Country code (ISO)"                                                  2>&1
+      echo "           -r  Sign Certificate Signing Request"                                    2>&1
+      echo "           -f  Force Certificate Signing Request"                                   2>&1
+      echo "     TEMPLATE  $(grep '^ *[a-z|]*)$' $0 | tr -d ' )' | tr '|' '\n' | tr '\n' ' ')"  2>&1
       exit 1
       ;;
   esac
