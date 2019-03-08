@@ -138,7 +138,6 @@ template ()
     root)
       echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} Root CA $(date +%Y)}'"
-      echo "#path_len = 1"
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
@@ -147,7 +146,6 @@ template ()
     inter)
       echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} ${CERT_LEAF_NAME} CA $(date +%Y)}'"
-      echo "#path_len = 0"
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
