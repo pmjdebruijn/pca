@@ -73,6 +73,10 @@ case ${ALGO} in
     ROOT_KEY_PARAMS='--ecdsa --curve secp384r1 --hash sha384'    # estimated sec equiv to RSA7680
     LEAF_KEY_PARAMS='--ecdsa --curve secp256r1 --hash sha256'    # estimated sec equiv to RSA3072
     ;;
+  EdDSA)
+    ROOT_KEY_PARAMS='--key-type ed25519 --hash sha512'           # untested, requires gnutls 3.6+
+    LEAF_KEY_PARAMS='--key-type ed25519 --hash sha512'           # untested, requires gnutls 3.6+
+    ;;
   *)
     echo "${BASENAME}: invalid ALGO: ${ALGO}" 1>&2 && exit 1
     ;;
