@@ -21,7 +21,7 @@ BASENAME=$(basename --suffix '.sh' $0)
 
 
 
-while getopts ':a:n:d:e:z:y:o:l:s:c:rf' OPT "$@"; do
+while getopts ':a:n:d:e:z:y:o:l:s:c:xf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
@@ -33,7 +33,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:rf' OPT "$@"; do
     l) LOCALITY=${OPTARG} ;;
     s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
-    r) REQUEST=sign ;;
+    x) REQUEST=sign ;;
     f) FORCE=IAMSURE ;;
     *)
       echo "Usage: ${BASENAME} [OPTION] TEMPLATE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]"      2>&1
@@ -47,7 +47,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:rf' OPT "$@"; do
       echo "           -l  Locality (City)"                                                     2>&1
       echo "           -s  State (or Province)"                                                 2>&1
       echo "           -c  Country code (ISO)"                                                  2>&1
-      echo "           -r  Sign Certificate Signing Request"                                    2>&1
+      echo "           -x  Sign Certificate Signing Request"                                    2>&1
       echo "           -f  Force Certificate Signing Request"                                   2>&1
       echo "     TEMPLATE  $(grep '^ *[a-z|]*)$' $0 | tr -d ' )' | tr '|' '\n' | tr '\n' ' ')"  2>&1
       exit 1

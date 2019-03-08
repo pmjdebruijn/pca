@@ -59,7 +59,7 @@ $ openssl req -nodes -newkey rsa:2048 -sha256 -keyout example-org.key -out examp
 Sign the CSR with your authority:
 
 $ mkdir -p acme/infrastructure/example-org; cp example-org.csr acme/infrastructure/example-org
-$ pca -r server acme/infrastructure example-org
+$ pca -x server acme/infrastructure example-org
 
 Revoke a certificate:
 
