@@ -1,7 +1,10 @@
 Private Certification Authority
 ===============================
 
-Important characteristics
+PCA is not what some might call an Enterprise grade Certification Authority,
+it's intended as a enhanced replacement for something like easy-rsa.
+
+Important characteristics:
 
  * Written as a dash compatible Bourne shell script (trivially adaptable)
  * Only has limited error handling
@@ -10,12 +13,13 @@ Important characteristics
  * Depends on GNU TLS' certtool
  * Only handles basic revocation through a CRL (no OCSP)
 
-Critical considerations for use
+Critical considerations for use:
 
  * Consider operating an authority from a LUKS encrypted partition
+ * Consider operating an authority from a machine that is permanently air gapped from your network
  * You need to verify the correct operation of the script on your particular system
- * You need to trust GNU TLS' key generation
- * You need to trust your systems entropy
+ * You need to trust GNU TLS' private key generation
+ * You need to trust your systems entropy handling
    Consider looking into using a hardware entropy source like a ChaosKey (from Altus Metrum)
    Particularly for generating the authorities themselves (as these are long lived private keys)
 
@@ -25,52 +29,55 @@ Basic Usage
 
 Download and install:
 
-$ sudo apt-get install gnutls-bin gnupg git
+$ sudo apt-get install gnutls-bin gnupg
 $ sudo wget https://raw.githubusercontent.com/pmjdebruijn/pca/master/pca -o /usr/local/bin/pca
 $ sudo chmod 755 /usr/local/bin/pca
 
-Create a new root certification authority:
+$ pca -h
 
-$ pca -c US -o 'ACME Corporation' root Anvil
+$ pca -a RSA -o 'ACME Corporation' -c 'US' root ACME
 
-Create a new (optional) intermediate certification authority (under our previously created root):
+$ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Infrastructure
+$ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure example.org
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -d www.example.org server ACME/Infrastructure example.org
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org www2.example.org' server ACME/Infrastructure example.org
+$ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure '*.example.org'
 
-$ pca -c US -o 'ACME Corporation' inter Anvil Hammer
+$ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Access
+$ pca -a RSA -o 'ACME Corporation' -c 'US' client ACME/Access api.othercorp.com
 
-Create a simple server certificate:
+$ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Identity
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -n 'John Doe' email ACME/Identity john@example.org
 
-$ pca -c US -o 'Example, Inc.' server anvil/hammer example.org
+$ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME 'Code Signing'
+$ pca -a RSA -o 'ACME Corporation' -c 'US' codesign ACME/'Code Signing' 'ACME Software'
 
-Create a server certificate including an additional subdomain:
-
-$ pca -c US -o 'Example, Inc.' -d www.example.org server anvil/hammer example.org
-
-Create a server certificate including multiple additional subdomains:
-
-$ pca -c US -o 'Example, Inc.' -d 'www.example.org www2.example.org www3.example.org' server anvil/hammer example.org
-
-Create multiple server certificates with the same domain name:
-
-$ pca -n www.example.org anvil/hammer server www.example.org_1
-$ pca -n www.example.org anvil/hammer server www.example.org_2
-$ pca -n www.example.org anvil/hammer server www.example.org_3
-
-Generate (remote) certificate signing request to sign:
+Remotely generate a CSR:
 
 $ openssl req -nodes -newkey rsa:2048 -sha256 -keyout example-org.key -out example-org.csr -subj "/C=US/ST=California/L=Sacramento/O=ACME Corporation/CN=example.org"
-$ mkdir -p anvil/hammer/example-org; cp example-org.csr anvil/hammer/example-org
-$ pca sign anvil/hammer example-org
+
+Sign the CSR with your authority:
+
+$ mkdir -p acme/infrastructure/example-org; cp example-org.csr acme/infrastructure/example-org
+$ pca -r server acme/infrastructure example-org
 
 Revoke a certificate:
 
-$ pca revoke anvil/hammer example.org
+$ pca revoke acme/infrastructure example.org
 
 Show certification authority hierarchical structure:
 
-$ find -type d anvil
-./anvil
-./anvil/hammer
-./anvil/hammer/example-org
+$ find -type d acme
+acme
+acme/codesigning
+acme/codesigning/acmesoftware
+acme/access
+acme/access/api-othercorp-com
+acme/identity
+acme/identity/john-at-example-org
+acme/infrastructure
+acme/infrastructure/example-org
+acme/infrastructure/wildcard-example-org
 
 Note that the last parameter is used for a certificates' CN as-is, including capitilisation and spaces if quoted are used.
 The script also uses the last parameter for its directory structure (but applies some normalisation, like caps removal).
