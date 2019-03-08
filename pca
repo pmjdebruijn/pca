@@ -133,7 +133,7 @@ template ()
   case ${TEMPLATE} in
     root)
       echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
-      echo "cn = '${NAME:-${CERT_ROOT_NAME} Private $ALGO Root Certification Authority $(date +%Y)}'"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} Root CA $(date +%Y)}'"
       echo "#path_len = 1"
       echo "ca"
       echo "cert_signing_key"
@@ -142,7 +142,7 @@ template ()
     ;;
     inter)
       echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
-      echo "cn = '${NAME:-${CERT_ROOT_NAME} ${CERT_LEAF_NAME} $ALGO Intermediate Certification Authority $(date +%Y)}'"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} ${CERT_LEAF_NAME} CA $(date +%Y)}'"
       echo "#path_len = 0"
       echo "ca"
       echo "cert_signing_key"
