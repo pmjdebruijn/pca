@@ -42,7 +42,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:rf' OPT "$@"; do
       echo "           -d  Additional domain names (DNS SubjectAltName)"                        2>&1
       echo "           -e  Additional email addresses (email SubjectAltName)"                   2>&1
       echo "           -z  Timezone"                                                            2>&1
-      echo "           -y  Year (valid up to and including)"                                    2>&1
+      echo "           -y  Year (valid up to and entirely including)"                           2>&1
       echo "           -o  Organisation name"                                                   2>&1
       echo "           -l  Locality (City)"                                                     2>&1
       echo "           -s  State (or Province)"                                                 2>&1
