@@ -43,8 +43,8 @@ $ pca -a RSA -o 'ACME Corporation' -c 'US' -d www.example.org server ACME/Infras
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org www2.example.org' server ACME/Infrastructure example.org
 $ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure '*.example.org'
 
-$ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Access
-$ pca -a RSA -o 'ACME Corporation' -c 'US' client ACME/Access api.othercorp.com
+$ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Customer
+$ pca -a RSA -o 'ACME Corporation' -c 'US' client ACME/Customer api.othercorp.com
 
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Identity
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -n 'John Doe' email ACME/Identity john@example.org
@@ -71,8 +71,8 @@ $ find -type d acme
 acme
 acme/codesigning
 acme/codesigning/acmesoftware
-acme/access
-acme/access/api-othercorp-com
+acme/customer
+acme/customer/api-othercorp-com
 acme/identity
 acme/identity/john-at-example-org
 acme/infrastructure
