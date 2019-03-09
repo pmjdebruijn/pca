@@ -36,31 +36,74 @@ $ sudo chmod 755 /usr/local/bin/pca
 
 $ pca -h
 
+Create a root certificate authority:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' root ACME
 
+Create an intermediate certificate authority for infrastructure purposes:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Infrastructure
+
+Generate a server certificate with a single domain name:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure example.org
+
+Generate a server certificate including the www subdomain (which is common for commercial authorities):
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -d www.example.org server ACME/Infrastructure example.org
+
+Generate a server certificate including multiple subdomains (sold as SAN certificates by commercial authorities):
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org www2.example.org' server ACME/Infrastructure example.org
+
+Generate multiple certificates for the same domain name:
+
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org' -n 'example.org' server ACME/Infrastructure example.org.1
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org' -n 'example.org' server ACME/Infrastructure example.org.2
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org' -n 'example.org' server ACME/Infrastructure example.org.3
+
+Generate a wildcard server certificate:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure '*.example.org'
 
+Create an intermediate certificate authority for customers:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Customer
-$ pca -a RSA -o 'ACME Corporation' -c 'US' client ACME/Customer api.othercorp.com
+
+Generate a client certificate for a customer:
+
+$ pca -a RSA -o 'ACME Corporation' -c 'US' client ACME/Customer othercorp.com
+
+Create an intermediate certificate authority for identity verification purposes:
 
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Identity
+
+Generate an email certificate:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -n 'John Doe' email ACME/Identity john@example.org
+
+Generate an email certificate including a secondary email address:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -n 'John Doe' -e 'j.doe@example.org' email ACME/Identity john@example.org
 
+Create an intermediate certificate authority for code signing:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME 'Code Signing'
+
+Generate a code signing certificate:
+
 $ pca -a RSA -o 'ACME Corporation' -c 'US' codesign ACME/'Code Signing' 'ACME Software'
 
 Remotely generate a CSR:
 
 $ openssl req -nodes -newkey rsa:2048 -sha256 -keyout example-org.key -out example-org.csr -subj "/C=US/ST=California/L=Sacramento/O=ACME Corporation/CN=example.org"
 
-Sign the CSR with your authority:
+Place the CSR for signing:
 
 $ mkdir -p acme/infrastructure/example-org; cp example-org.csr acme/infrastructure/example-org
+
+Sign the CSR with your authority:
+
 $ pca -x server acme/infrastructure example-org
 
 Revoke a certificate:
@@ -74,7 +117,7 @@ acme
 acme/codesigning
 acme/codesigning/acmesoftware
 acme/customer
-acme/customer/api-othercorp-com
+acme/customer/othercorp-com
 acme/identity
 acme/identity/john-at-example-org
 acme/infrastructure
