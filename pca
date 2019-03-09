@@ -178,13 +178,10 @@ template ()
     email)
       echo "cn = '${NAME:-Basic ID}'"
       echo "pkcs9_email = '${CERT_LEAF_NAME}'"
-      if [ "${EMAIL_NAMES}"  = "" ]; then
-        echo "email = '${CERT_LEAF_NAME}'"                         # Subject Alternative Name
-      else
-        for EMAIL_NAME in ${EMAIL_NAMES}; do
-          echo "email = '${EMAIL_NAME}'"                           # Subject Alternative Name
-        done
-      fi
+      echo "email = '${CERT_LEAF_NAME}'"                           # Subject Alternative Name
+      for EMAIL_NAME in ${EMAIL_NAMES}; do
+        echo "email = '${EMAIL_NAME}'"                             # Subject Alternative Name
+      done
       echo "email_protection_key"
       echo "data_encipherment"
       echo "signing_key"

@@ -12,7 +12,7 @@ Important characteristics:
  * Has not been exhaustively tested
  * Has not been audited by a third party (but should be fairly easy to audit)
  * Depends on GNU TLS' certtool
- * Only handles basic revocation through a CRL (no OCSP)
+ * Only handles basic revocation through a CRL (no built-in OCSP support)
 
 Critical considerations for use:
 
@@ -49,6 +49,7 @@ $ pca -a RSA -o 'ACME Corporation' -c 'US' client ACME/Customer api.othercorp.co
 
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME Identity
 $ pca -a RSA -o 'ACME Corporation' -c 'US' -n 'John Doe' email ACME/Identity john@example.org
+$ pca -a RSA -o 'ACME Corporation' -c 'US' -n 'John Doe' -e 'j.doe@example.org' email ACME/Identity john@example.org
 
 $ pca -a RSA -o 'ACME Corporation' -c 'US' inter ACME 'Code Signing'
 $ pca -a RSA -o 'ACME Corporation' -c 'US' codesign ACME/'Code Signing' 'ACME Software'
