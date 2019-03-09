@@ -21,7 +21,7 @@ BASENAME=$(basename --suffix '.sh' $0)
 
 
 
-while getopts ':a:n:d:e:z:y:o:l:s:c:xf' OPT "$@"; do
+while getopts ':a:n:d:e:z:y:o:l:s:c:xrf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
@@ -34,6 +34,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:xf' OPT "$@"; do
     s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
     x) REQUEST=sign ;;
+    r) REQUEST=revoke ;;
     f) FORCE=IAMSURE ;;
     *)
       echo "Usage: ${BASENAME} [OPTION] TEMPLATE CERTIFICATE_AUTHORITY [LEAF_CERTIFICATE]"      2>&1
@@ -48,6 +49,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:xf' OPT "$@"; do
       echo "           -s  State (or Province)"                                                 2>&1
       echo "           -c  Country code (ISO)"                                                  2>&1
       echo "           -x  Sign Certificate Signing Request"                                    2>&1
+      echo "           -r  Revoke Certificate"                                                  2>&1
       echo "           -f  Force Certificate Signing Request"                                   2>&1
       echo "     TEMPLATE  $(grep '^ *[a-z|]*)$' $0 | tr -d ' )' | tr '|' '\n' | tr '\n' ' ')"  2>&1
       exit 1
@@ -238,7 +240,7 @@ fi
 
 if [ $# -eq 3 ] &&                                                                                \
    [ "${REQUEST}" != "sign" ] &&                                                                  \
-   [ "${TEMPLATE}" != "revoke" ] &&                                                               \
+   [ "${REQUEST}" != "revoke" ] &&                                                                \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key ] &&                                          \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).crt ] &&                                          \
    [ ! -d ${CERT_ROOT}/${CERT_LEAF}                 ]; then
@@ -326,6 +328,7 @@ if [ $# -eq 3 ] &&                                                              
 fi
 
 if [ $# -eq 3 ] &&                                                                                \
+   [ "${REQUEST}" = "revoke" ] &&                                                                 \
    [ "${TEMPLATE}" = "revoke" ] &&                                                                \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
