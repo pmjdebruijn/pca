@@ -64,7 +64,7 @@ $ pca -x server acme/infrastructure example-org
 
 Revoke a certificate:
 
-$ pca revoke acme/infrastructure example.org
+$ pca -r revoke acme/infrastructure example.org
 
 Show certification authority hierarchical structure:
 
