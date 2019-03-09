@@ -50,7 +50,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:xrf' OPT "$@"; do
       echo "           -c  Country code (ISO)"                                                  2>&1
       echo "           -x  Sign Certificate Signing Request"                                    2>&1
       echo "           -r  Revoke Certificate"                                                  2>&1
-      echo "           -f  Force Certificate Signing Request"                                   2>&1
+      echo "           -f  Force (don't ask for confirmation)"                                  2>&1
       echo "     TEMPLATE  $(grep '^ *[a-z|]*)$' $0 | tr -d ' )' | tr '|' '\n' | tr '\n' ' ')"  2>&1
       exit 1
       ;;
@@ -84,6 +84,15 @@ case ${ALGO} in
     echo "${BASENAME}: invalid ALGO: ${ALGO}" 1>&2 && exit 1
     ;;
 esac
+
+
+
+
+confirm ()
+{
+  [ "${FORCE}" != "IAMSURE" ] && echo "Are you sure you want to proceed with the $1 operation (Type IAMSURE to continue)?" && read FORCE
+  [ "${FORCE}" != "IAMSURE" ] && echo "The user failed to confirm requested $1 operation, aborting..." 1>&2 && exit 1
+}
 
 
 
@@ -300,12 +309,9 @@ if [ $# -eq 3 ] &&                                                              
    [ ! -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
 
   certtool --crq-info --infile                ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr
-
-  [ "${FORCE}" != "IAMSURE" ] && echo "Do you want to sign the above certificate signing request (Type IAMSURE to continue)?" && read FORCE
-  [ "${FORCE}" != "IAMSURE" ] && echo "Aborting" 1>&2 && exit 1
+  confirm signing
 
   template                                  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
-
   certtool --generate-certificate             ${LEAF_KEY_PARAMS}                                  \
            --template                         ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg          \
            --load-request                     ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.csr          \
@@ -332,6 +338,9 @@ if [ $# -eq 3 ] &&                                                              
    [ "${TEMPLATE}" = "revoke" ] &&                                                                \
    [   -f ${CERT_ROOT}/$(basename ${CERT_ROOT}).key  ] &&                                         \
    [   -f ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt ]; then
+
+  certtool --certificate-info --infile        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt
+  confirm revocation
 
   certtool --generate-crl                                                                         \
            --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
