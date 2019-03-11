@@ -213,11 +213,6 @@ template ()
 
 
 
-[ -f /proc/sys/kernel/random/entropy_avail ] && while [ $(cat /proc/sys/kernel/random/entropy_avail) -lt 1000 ]; do sleep 1; done
-
-
-
-
 if [ $# -eq 2 ] &&                                                                                \
    [ "${TEMPLATE}" = "root" ] &&                                                                  \
    [ ! -d ${CERT_ROOT} ]; then
