@@ -21,7 +21,7 @@ BASENAME=$(basename --suffix '.sh' $0)
 
 
 
-while getopts ':a:n:d:e:z:y:o:l:s:c:xrf' OPT "$@"; do
+while getopts ':a:n:d:e:z:y:o:u:l:s:c:xrf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
@@ -30,6 +30,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:xrf' OPT "$@"; do
     z) TIMEZONE=${OPTARG} ;;
     y) YEAR=${OPTARG} ;;
     o) ORGANIZATION=${OPTARG} ;;
+    u) UNIT=${OPTARG} ;;
     l) LOCALITY=${OPTARG} ;;
     s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
@@ -45,6 +46,7 @@ while getopts ':a:n:d:e:z:y:o:l:s:c:xrf' OPT "$@"; do
       echo "           -z  Timezone"                                                            2>&1
       echo "           -y  Year (valid up to and entirely including)"                           2>&1
       echo "           -o  Organisation name"                                                   2>&1
+      echo "           -u  Organisational unit"                                                 2>&1
       echo "           -l  Locality (City)"                                                     2>&1
       echo "           -s  State (or Province)"                                                 2>&1
       echo "           -c  Country code (ISO)"                                                  2>&1
@@ -148,7 +150,7 @@ template ()
 
   case ${TEMPLATE} in
     root)
-      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
+      echo "unit = '${UNIT:-${NAME:-${CERT_ROOT_NAME}} Trust Network}'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} Root CA $(date +%Y)}'"
       echo "ca"
       echo "cert_signing_key"
@@ -156,7 +158,7 @@ template ()
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_ROOT_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
     ;;
     inter)
-      echo "unit = '${NAME:-${CERT_ROOT_NAME}} Trust Network'"
+      echo "unit = '${UNIT:-${NAME:-${CERT_ROOT_NAME}} Trust Network}'"
       echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} ${CERT_LEAF_NAME} CA $(date +%Y)}'"
       echo "ca"
       echo "cert_signing_key"
@@ -164,6 +166,7 @@ template ()
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_INTER_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       ;;
     server|client)
+      [ "${UNIT}" != "" ] && echo "unit = '${UNIT}'"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"               # Subject Alternative Name
       for DNS_NAME in ${DNS_NAMES}; do
@@ -176,6 +179,7 @@ template ()
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       ;;
     email)
+      [ "${UNIT}" != "" ] && echo "unit = '${UNIT}'"
       echo "cn = '${NAME:-Basic ID}'"
       echo "pkcs9_email = '${CERT_LEAF_NAME}'"
       echo "email = '${CERT_LEAF_NAME}'"                           # Subject Alternative Name
@@ -190,6 +194,7 @@ template ()
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       ;;
     codesign)
+      [ "${UNIT}" != "" ] && echo "unit = '${UNIT}'"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "signing_key"
       echo "code_signing_key"
@@ -197,6 +202,7 @@ template ()
       echo "expiration_date = '${YEAR:-$(( $(date +%Y) + ${DEFAULT_LEAF_YEARS} ))}-12-31 23:59:59 ${TIMEZONE:-${DEFAULT_TIMEZONE}}'"
       ;;
     timestamp)
+      [ "${UNIT}" != "" ] && echo "unit = '${UNIT}'"
       echo "cn = '${NAME:-${CERT_LEAF_NAME}}'"
       echo "signing_key"
       echo "time_stamping_key"
