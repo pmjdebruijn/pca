@@ -64,7 +64,7 @@ $ pca -a RSA -o 'ACME Corporation' -c 'US' -d 'www.example.org' -n 'example.org'
 
 Generate a wildcard server certificate:
 
-$ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure '*.example.org'
+$ pca -a RSA -o 'ACME Corporation' -c 'US' server ACME/Infrastructure '*.dev.example.org'
 
 Create an intermediate certificate authority for customers:
 
@@ -122,7 +122,7 @@ acme/identity
 acme/identity/john-at-example-org
 acme/infrastructure
 acme/infrastructure/example-org
-acme/infrastructure/wildcard-example-org
+acme/infrastructure/wildcard-dev-example-org
 
 Note that the last parameter is used for a certificates' CN as-is, including capitilisation and spaces if quoted are used.
 The script also uses the last parameter for its directory structure (but applies some normalisation, like caps removal).
