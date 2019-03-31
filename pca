@@ -13,7 +13,7 @@ ALGO=RSA
 
 
 
-BASENAME=$(basename --suffix '.sh' $0)
+BASENAME=$(basename "$0" .sh)
 
 [ ! -x "$(which certtool)" ] && echo "${BASENAME} needs certtool (gnutls-bin) anywhere in ${PATH}" 1>&2 && exit 1
 [ ! -x "$(which gpg)" ] && echo "${BASENAME} needs gpg (gnupg) anywhere in ${PATH}" 1>&2 && exit 1
