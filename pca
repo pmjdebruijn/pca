@@ -116,14 +116,6 @@ md5sums ()
 
 
 
-crlbundle ()
-{
-  cat $(find $1 -name "*.crl" -not -name "*.bundle.crl" -type f | sort)
-}
-
-
-
-
 crtbundle ()
 {
   local D=$1
@@ -241,8 +233,6 @@ if [ $# -eq 2 ] &&                                                              
            --load-ca-certificate              ${CERT_ROOT}/${CERT_ROOT}.crt                       \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.crl
 
-  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
-
 fi
 
 if [ $# -eq 3 ] &&                                                                                \
@@ -296,9 +286,6 @@ if [ $# -eq 3 ] &&                                                              
            --load-ca-certificate              ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crl
 
-  [ "${TEMPLATE}" = "inter" ] &&                                                                  \
-  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
-
 fi
 
 if [ $# -eq 3 ] &&                                                                                \
@@ -340,6 +327,8 @@ if [ $# -eq 3 ] &&                                                              
   certtool --certificate-info --infile        ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt
   confirm revocation
 
+
+  [ "${CERT_ROOT}" != "${CA_ROOT}" ] &&                                                           \
   certtool --generate-crl                                                                         \
            --load-crl                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl           \
            --template                         ${CERT_ROOT}/$(basename ${CERT_ROOT}).cfg           \
@@ -350,9 +339,23 @@ if [ $# -eq 3 ] &&                                                              
 
   if [ $? -eq 0 ]; then
     mv ${CERT_ROOT}/$(basename ${CERT_ROOT}).crlx ${CERT_ROOT}/$(basename ${CERT_ROOT}).crl
-    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
+  else
+    echo "ERROR: Failed to update Intermediate CA CRL" && exit 1
   fi
 
-  crlbundle ${CA_ROOT}                      > ${CA_ROOT}/${CA_ROOT}.bundle.crl
+  certtool --generate-crl                                                                         \
+           --load-crl                         ${CA_ROOT}/$(basename ${CA_ROOT}).crl               \
+           --template                         ${CA_ROOT}/$(basename ${CA_ROOT}).cfg               \
+           --load-ca-privkey                  ${CA_ROOT}/$(basename ${CA_ROOT}).key               \
+           --load-ca-certificate              ${CA_ROOT}/$(basename ${CA_ROOT}).crt               \
+           --load-certificate                 ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.crt          \
+           --outfile                          ${CA_ROOT}/$(basename ${CA_ROOT}).crlx
+
+  if [ $? -eq 0 ]; then
+    mv ${CA_ROOT}/$(basename ${CA_ROOT}).crlx ${CA_ROOT}/$(basename ${CA_ROOT}).crl
+    mv ${CERT_ROOT}/${CERT_LEAF} ${CERT_ROOT}/${CERT_LEAF}_REVOKED_$(date +%Y%m%d%H%M%S)
+  else
+    echo "ERROR: Failed to update Root CA CRL" && exit 1
+  fi
 
 fi
