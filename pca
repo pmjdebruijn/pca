@@ -21,11 +21,12 @@ BASENAME=$(basename "$0" .sh)
 
 
 
-while getopts ':a:n:d:e:z:y:o:u:l:s:c:xrf' OPT "$@"; do
+while getopts ':a:n:d:i:e:z:y:o:u:l:s:c:xrf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
     d) DNS_NAMES=${OPTARG} ;;
+    i) IP_ADDRESSES=${OPTARG} ;;
     e) EMAIL_NAMES=${OPTARG} ;;
     z) TIMEZONE=${OPTARG} ;;
     y) YEAR=${OPTARG} ;;
@@ -42,6 +43,7 @@ while getopts ':a:n:d:e:z:y:o:u:l:s:c:xrf' OPT "$@"; do
       echo "           -a  Cryptographic algorithm (RSA ECDSA)"                                 2>&1
       echo "           -n  Override Common Name"                                                2>&1
       echo "           -d  Additional domain names (DNS SubjectAltName)"                        2>&1
+      echo "           -i  Additional ip addresses (IP SubjectAltName)"                         2>&1
       echo "           -e  Additional email addresses (email SubjectAltName)"                   2>&1
       echo "           -z  Timezone"                                                            2>&1
       echo "           -y  Year (valid up to and entirely including)"                           2>&1
@@ -163,6 +165,9 @@ template ()
       echo "dns_name = '${NAME:-${CERT_LEAF_NAME}}'"               # Subject Alternative Name
       for DNS_NAME in ${DNS_NAMES}; do
         echo "dns_name = '${DNS_NAME}'"                            # Subject Alternative Name
+      done
+      for IP_ADDRESS in ${IP_ADDRESSES}; do
+        echo "ip_address = '${IP_ADDRESS}'"                        # Subject Alternative Name
       done
       echo "signing_key"
       echo "encryption_key"
