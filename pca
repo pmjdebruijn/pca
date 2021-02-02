@@ -21,7 +21,7 @@ BASENAME=$(basename "$0" .sh)
 
 
 
-while getopts ':a:n:d:i:e:z:y:o:u:l:s:c:p:xrf' OPT "$@"; do
+while getopts ':a:n:d:i:e:z:y:o:u:l:s:c:t:p:xrf' OPT "$@"; do
   case ${OPT} in
     a) ALGO=${OPTARG} ;;
     n) NAME=${OPTARG} ;;
@@ -35,7 +35,8 @@ while getopts ':a:n:d:i:e:z:y:o:u:l:s:c:p:xrf' OPT "$@"; do
     l) LOCALITY=${OPTARG} ;;
     s) STATE=${OPTARG} ;;
     c) COUNTRY=${OPTARG} ;;
-    p) CRL_DIST_POINTS=${OPTARG} ;;
+    t) CRL_DIST_POINTS=${OPTARG} ;;
+    p) PASSPHRASE=${OPTARG} ;;
     x) REQUEST=sign ;;
     r) REQUEST=revoke ;;
     f) FORCE=IAMSURE ;;
@@ -53,7 +54,8 @@ while getopts ':a:n:d:i:e:z:y:o:u:l:s:c:p:xrf' OPT "$@"; do
       echo "           -l  Locality (City)"                                                     2>&1
       echo "           -s  State (or Province)"                                                 2>&1
       echo "           -c  Country code (ISO)"                                                  2>&1
-      echo "           -p  CRL Dist Points"                                                     2>&1
+      echo "           -t  CRL Dist Points"                                                     2>&1
+      echo "           -p  Passphrase for GPG/PKCS#12 export"                                   2>&1
       echo "           -x  Sign Certificate Signing Request"                                    2>&1
       echo "           -r  Revoke Certificate"                                                  2>&1
       echo "           -f  Force (don't ask for confirmation)"                                  2>&1
@@ -105,7 +107,12 @@ confirm ()
 
 genpass ()
 {
-  echo $(head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01iIl5S8B' | tail -c 24) | tee $1
+  if [ "${PASSPHRASE}" != "" ]; then
+    echo "${PASSPHRASE}" | tee $1
+  else
+    echo $(head -c 48 /dev/urandom | base64 -w 0 | tr -d '/+=oO01iIl5S8B' | tail -c 24) | tee $1
+  fi
+
   [ -f $1 ] && chmod 600 $1
 }
 
