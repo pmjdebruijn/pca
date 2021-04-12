@@ -6,7 +6,7 @@ it's intended as a enhanced replacement for something like easy-rsa.
 
 Important characteristics:
 
- * Developed on Ubuntu 18.04 using GNU TLS 3.5.18
+ * Developed on Ubuntu 20.04 using GNU TLS 3.6.13
  * Written as a dash compatible Bourne shell script (trivially adaptable)
  * Only has limited error handling
  * Has not been exhaustively tested

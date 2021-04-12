@@ -241,7 +241,7 @@ if [ $# -eq 2 ] &&                                                              
    [ ! -d ${CERT_ROOT} ]; then
 
   mkdir -p ${CERT_ROOT}
-  certtool --generate-privkey                 ${ROOT_KEY_PARAMS}                                  \
+  certtool --generate-privkey --no-text       ${ROOT_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_ROOT}.key
 
   template                                  > ${CERT_ROOT}/${CERT_ROOT}.cfg
@@ -270,7 +270,7 @@ if [ $# -eq 3 ] &&                                                              
   [ "${TEMPLATE}" = "inter" ] && LEAF_KEY_PARAMS=${ROOT_KEY_PARAMS}
 
   mkdir -p ${CERT_ROOT}/${CERT_LEAF}
-  certtool --generate-privkey                 ${LEAF_KEY_PARAMS}                                  \
+  certtool --generate-privkey --no-text       ${LEAF_KEY_PARAMS}                                  \
            --outfile                          ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.key
 
   template                                  > ${CERT_ROOT}/${CERT_LEAF}/${CERT_LEAF}.cfg
