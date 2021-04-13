@@ -152,15 +152,15 @@ template ()
 
   case ${TEMPLATE} in
     root)
-      echo "unit = '${UNIT:-${NAME:-${CERT_ROOT_NAME}} Trust Network}'"
-      echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} Root CA $(date +%Y)}'"
+      echo "unit = '${UNIT:-${NAME:-${CERT_ROOT_NAME%%/*}} Trust Network}'"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME%%/*} ${ALGO} Root CA $(date +%Y)}'"
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
     ;;
     inter)
-      echo "unit = '${UNIT:-${NAME:-${CERT_ROOT_NAME}} Trust Network}'"
-      echo "cn = '${NAME:-${CERT_ROOT_NAME} ${ALGO} ${CERT_LEAF_NAME} CA $(date +%Y)}'"
+      echo "unit = '${UNIT:-${NAME:-${CERT_ROOT_NAME%%/*}} Trust Network}'"
+      echo "cn = '${NAME:-${CERT_ROOT_NAME%%/*} ${ALGO} ${CERT_LEAF_NAME} CA $(date +%Y)}'"
       echo "ca"
       echo "cert_signing_key"
       echo "crl_signing_key"
